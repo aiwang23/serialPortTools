@@ -30,6 +30,9 @@ public:
 
     void exec();
 
+protected:
+    void showEvent(QShowEvent *event) override;
+
 Q_SIGNALS:
     Q_SIGNAL void finished();
 

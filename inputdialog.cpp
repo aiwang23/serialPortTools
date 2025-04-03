@@ -7,6 +7,7 @@
 #include "inputdialog.h"
 #include "ui_inputDialog.h"
 #include <ElaMessageBar.h>
+#include <QFocusEvent>
 
 inputDialog::inputDialog(const QString &titleName, const QString &text, QWidget *parent) : ElaWidget(parent),
     ui(new Ui::inputDialog) {
@@ -38,4 +39,12 @@ void inputDialog::exec() {
     QEventLoop loop;
     connect(this, &inputDialog::finished, &loop, &QEventLoop::quit);
     loop.exec();
+}
+
+void inputDialog::showEvent(QShowEvent *event) {
+    ElaWidget::showEvent(event);
+
+    // 手动发送一个 FocusIn event, 播放动画
+    QFocusEvent focusEvent(QEvent::FocusIn, Qt::MouseFocusReason);
+    QCoreApplication::sendEvent(ui->lineEdit, &focusEvent);
 }

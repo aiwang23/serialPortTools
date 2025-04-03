@@ -5,6 +5,9 @@
 // You may need to build the project (run Qt uic code generator) to get "ui_mainWindow.h" resolved
 
 #include "mainwindow.h"
+
+#include <ElaIconButton.h>
+
 #include "ui_mainWindow.h"
 #include <ElaTheme.h>
 #include <QSettings>
@@ -13,6 +16,8 @@
 #include <CSerialPort/SerialPortInfo.h>
 #include <maddy/parser.h>
 #include <QTimer>
+#include <bitset>
+#include <QBitArray>
 
 using itas109::CSerialPortInfo;
 using itas109::SerialPortInfo;
@@ -96,6 +101,10 @@ mainWindow::mainWindow(QWidget *parent) : QWidget(parent), ui(new Ui::mainWindow
 
     ui->toggleswitch_open->setText("open");
 
+    // 刷新串口按钮 在 ui->comboBox_port 右侧
+    iconBtn_flush_ = new ElaIconButton{ElaIconType::ArrowRotateLeft, 17, 20, 20};
+    ui->gridLayout->addWidget(iconBtn_flush_, 0, 2);
+
     // 初始化 combobox 组件
     initComboBox();
     // init signals 和 slots
@@ -115,11 +124,8 @@ mainWindow::~mainWindow() {
 
 void mainWindow::initComboBox() {
     ui->comboBox_port->setToolTip(tr("serial port"));
-    // 获取可用串口list
-    std::vector<SerialPortInfo> portNameList = CSerialPortInfo::availablePortInfos();
-    for (SerialPortInfo portName: portNameList) {
-        ui->comboBox_port->addItem(QString::fromLocal8Bit(portName.portName));
-    }
+    // 刷新串口，更新状态
+    refreshSerialPort();
 
     ui->comboBox_baud->setToolTip(tr("baud rate"));
     ui->comboBox_baud->addItems(
@@ -142,7 +148,7 @@ void mainWindow::initComboBox() {
     );
 
     ui->comboBox_show_type->addItems(
-        {"text", "markdown", "html"}
+        {"text", "bin", "hex", "markdown", "html"}
     );
 }
 
@@ -189,7 +195,6 @@ void mainWindow::initSignalSlots() {
                 std::string type = ui->comboBox_show_type->currentText().toStdString();
                 show_type_ = showTypeFrom(type);
                 ui->toggleswitch_open->setText(tr("close"));
-
             } else {
                 // 没有可用 serials
                 ElaMessageBar::error(ElaMessageBarType::TopLeft, "error", tr("This Computer no avaiable port"), 3000,
@@ -235,6 +240,25 @@ void mainWindow::initSignalSlots() {
         if (show_type_ == TEXT) {
             ui->plainTextEdit_out->moveCursor(QTextCursor::End);
             ui->plainTextEdit_out->insertPlainText(msg);
+        } else if (show_type_ == BIN) {
+            QString bin;
+            for (size_t i = 0; i < msg.size(); ++i) {
+                std::bitset<8> bits(msg.at(i).toLatin1());
+                bin += bits.to_string().c_str();
+            }
+            ui->plainTextEdit_out->moveCursor(QTextCursor::End);
+            ui->plainTextEdit_out->insertPlainText(bin);
+        } else if (show_type_ == HEX) {
+            constexpr char hexChars[] = "0123456789abcdef";
+            std::string hex;
+            hex.reserve(msg.size() * 2);
+            std::string bin = msg.toStdString();
+            for (unsigned char byte: bin) {
+                hex.push_back(hexChars[byte >> 4]);
+                hex.push_back(hexChars[byte & 0x0F]);
+            }
+            ui->plainTextEdit_out->moveCursor(QTextCursor::End);
+            ui->plainTextEdit_out->insertPlainText(QString::fromStdString(hex));
         } else if (show_type_ == HTML) {
             static QString lastLine;
             QStringList lines = msg.split("\n");
@@ -251,29 +275,18 @@ void mainWindow::initSignalSlots() {
             }
         } else if (show_type_ == MARKDOWN) {
             static QString lastLine;
-            static QTimer timer;
-            timer.setInterval(50);
-            timer.setSingleShot(false);
-            connect(&timer, &QTimer::timeout, this, [this]() {
-                std::stringstream strSt;
-                strSt << lastLine.toStdString();
-                ui->plainTextEdit_out->appendHtml(parser_->Parse(strSt).c_str());
-                lastLine = "";
-                timer.stop();
-            });
+            std::stringstream strSt;
             QStringList lines = msg.split("\n");
             lines[0] = lastLine + lines[0];
             for (int i = 0; i < lines.size(); ++i) {
                 if (i != lines.size() - 1) {
-                    std::stringstream strSt;
                     strSt << lines[i].toStdString();
-                    std::string html = parser_->Parse(strSt);
-                    ui->plainTextEdit_out->appendHtml(QString::fromStdString(html));
                 }
             }
+            std::string html = parser_->Parse(strSt);
+            ui->plainTextEdit_out->appendHtml(QString::fromStdString(html));
 
             lastLine = lines.back();
-            timer.start();
         }
     }, Qt::QueuedConnection);
 
@@ -281,24 +294,22 @@ void mainWindow::initSignalSlots() {
     connect(ui->comboBox_show_type, &QComboBox::currentTextChanged, this, [this](QString item) {
         if (showTypeFrom(item.toStdString()) == TEXT) {
             show_type_ = TEXT;
-            ui->plainTextEdit_out->setPlainText(ui->plainTextEdit_out->toPlainText());
+        } else if (showTypeFrom(item.toStdString()) == BIN) {
+            show_type_ = BIN;
+        } else if (showTypeFrom(item.toStdString()) == HEX) {
+            show_type_ = HEX;
         } else if (showTypeFrom(item.toStdString()) == MARKDOWN) {
             show_type_ = MARKDOWN;
-            std::stringstream strSt;
-            strSt << ui->plainTextEdit_out->toPlainText().toStdString();
-            std::string html = parser_->Parse(strSt);
-            ui->plainTextEdit_out->clear();
-            ui->plainTextEdit_out->appendHtml(QString::fromStdString(html));
         } else if (showTypeFrom(item.toStdString()) == HTML) {
             show_type_ = HTML;
-            QString text = ui->plainTextEdit_out->toPlainText();
-            ui->plainTextEdit_out->clear();
-            ui->plainTextEdit_out->appendHtml(text);
         }
     });
 
     // 接受serial onReadEvent初始化
     serial_port_.connectReadEvent(this);
+
+    // 刷新串口状态
+    connect(iconBtn_flush_, &ElaIconButton::clicked, this, &mainWindow::refreshSerialPort);
 }
 
 
@@ -320,5 +331,14 @@ void mainWindow::onReadEvent(const char *portName, unsigned int readBufferLen) {
             delete[] str;
             str = nullptr;
         }
+    }
+}
+
+void mainWindow::refreshSerialPort() {
+    // 获取可用串口list
+    std::vector<SerialPortInfo> portNameList = CSerialPortInfo::availablePortInfos();
+    ui->comboBox_port->clear();
+    for (SerialPortInfo portName: portNameList) {
+        ui->comboBox_port->addItem(QString::fromLocal8Bit(portName.portName));
     }
 }

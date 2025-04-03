@@ -80,6 +80,7 @@ void tabWindow::initSignalSlots() {
             int idx = ui->tabWidget->addTab(w, tr("setting"));
             ui->tabWidget->setCurrentIndex(idx);
         });
+
         menu.exec(QCursor::pos());
     });
 

@@ -8,17 +8,21 @@
 #include <ElaWidget.h>
 #include <CSerialPort/SerialPort.h>
 
+class ElaIconButton;
+
 namespace maddy {
     class Parser;
     struct ParserConfig;
 }
 
 // 输出框渲染类型
-enum showType { NONE = -1, TEXT, MARKDOWN, HTML };
+enum showType { NONE = -1, TEXT, BIN, HEX, MARKDOWN, HTML };
 
 // string to showType
-inline showType showTypeFrom(std::string str) {
+inline showType showTypeFrom(const std::string &str) {
     if ("text" == str) return TEXT;
+    else if ("bin" == str) return BIN;
+    else if ("hex" == str) return HEX;
     else if ("markdown" == str) return MARKDOWN;
     else if ("html" == str) return HTML;
     else return NONE;
@@ -50,6 +54,9 @@ private:
 
     void initSignalSlots();
 
+    // 接受serial data回调
+    Q_SLOT void onReadEvent(const char *portName, unsigned int readBufferLen);
+
 Q_SIGNALS:
     Q_SIGNAL void sigClearComboBoxPort();
 
@@ -58,8 +65,7 @@ Q_SIGNALS:
     Q_SIGNAL void sigSerialPortData(QString data);
 
 private Q_SLOTS:
-    // 接受serial data回调
-    Q_SLOT void onReadEvent(const char *portName, unsigned int readBufferLen);
+    void refreshSerialPort();
 
 private:
     Ui::mainWindow *ui;
@@ -69,6 +75,8 @@ private:
     // markdown 转 html
     std::shared_ptr<maddy::ParserConfig> config_;
     std::unique_ptr<maddy::Parser> parser_;
+
+    ElaIconButton *iconBtn_flush_;
 };
 
 
