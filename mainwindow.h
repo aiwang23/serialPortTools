@@ -28,6 +28,13 @@ public:
 
     void initSignalSlots();
 
+protected:
+    void resizeEvent(QResizeEvent *event) override;
+
+Q_SIGNALS:
+    Q_SIGNAL void hideSecondaryWindow();
+    Q_SIGNAL void showSecondaryWindow();
+
 public Q_SLOTS:
     Q_SLOT void newSerialWindow();
 

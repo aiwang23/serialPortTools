@@ -68,6 +68,11 @@ Q_SIGNALS:
 private Q_SLOTS:
     void refreshSerialPort();
 
+public Q_SLOT:
+    void hideSecondaryWindow();
+
+    void showSecondaryWindow();
+
 private:
     Ui::serialWindow *ui;
     CSerialPort serial_port_;

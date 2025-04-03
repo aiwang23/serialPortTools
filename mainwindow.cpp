@@ -90,6 +90,32 @@ void mainWindow::initSignalSlots() {
         if (ui->tabWidget->count() <= 1)
             close();
     });
+
+    // 父组件 传子组件
+    // serialWindow *w = findChild<serialWindow *>();
+    // if (w) {
+    //     connect(this, &mainWindow::hideSecondaryWindow, w, &serialWindow::hideSecondaryWindow);
+    //     connect(this, &mainWindow::showSecondaryWindow, w, &serialWindow::showSecondaryWindow);
+    // }
+    QList<serialWindow *> w_list = findChildren<serialWindow *>();
+    for (auto w: w_list) {
+        connect(this, &mainWindow::hideSecondaryWindow, w, &serialWindow::hideSecondaryWindow);
+        connect(this, &mainWindow::showSecondaryWindow, w, &serialWindow::showSecondaryWindow);
+    }
+}
+
+void mainWindow::resizeEvent(QResizeEvent *event) {
+    ElaWidget::resizeEvent(event);
+    // 获取屏幕的宽度
+    QScreen *screen = QApplication::primaryScreen();
+    int screenWidth = screen->geometry().width();
+
+    // 检查当前窗口宽度是否是屏幕宽度的一半 隐藏副窗口
+    if (this->width() <= screenWidth / 2 + 1) {
+        emit hideSecondaryWindow();
+    } else {
+        emit showSecondaryWindow();
+    }
 }
 
 void mainWindow::newSerialWindow() {

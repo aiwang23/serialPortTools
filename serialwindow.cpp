@@ -21,6 +21,8 @@
 #include <ElaToggleButton.h>
 #include <QFileDialog>
 
+#include "mainwindow.h"
+
 using itas109::CSerialPortInfo;
 using itas109::SerialPortInfo;
 
@@ -430,7 +432,8 @@ void serialWindow::initSignalSlots() {
         out << ui->plainTextEdit_out->toPlainText(); // 写入文本
         file.close();
 
-        ElaMessageBar::information(ElaMessageBarType::TopLeft, "info", tr("save successfully").arg(fileName), 3000, this);
+        ElaMessageBar::information(ElaMessageBarType::TopLeft, "info", tr("save successfully").arg(fileName), 3000,
+                                   this);
     });
 }
 
@@ -474,4 +477,16 @@ void serialWindow::refreshSerialPort() {
     for (SerialPortInfo portName: portNameList) {
         ui->comboBox_port->addItem(QString::fromLocal8Bit(portName.portName));
     }
+}
+
+void serialWindow::hideSecondaryWindow() {
+    ui->groupBox_port->hide();
+    ui->groupBox_recv->hide();
+    ui->groupBox_send->hide();
+}
+
+void serialWindow::showSecondaryWindow() {
+    ui->groupBox_port->show();
+    ui->groupBox_recv->show();
+    ui->groupBox_send->show();
 }
