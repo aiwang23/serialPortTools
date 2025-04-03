@@ -4,11 +4,11 @@
 
 // You may need to build the project (run Qt uic code generator) to get "ui_mainWindow.h" resolved
 
-#include "mainwindow.h"
+#include "serialwindow.h"
 
 #include <ElaIconButton.h>
 
-#include "ui_mainWindow.h"
+#include "ui_serialwindow.h"
 #include <ElaTheme.h>
 #include <QSettings>
 #include <ElaMessageBar.h>
@@ -18,6 +18,7 @@
 #include <QTimer>
 #include <bitset>
 #include <QBitArray>
+#include <ElaToggleButton.h>
 
 using itas109::CSerialPortInfo;
 using itas109::SerialPortInfo;
@@ -78,7 +79,7 @@ static bool isHtml(const QString &text) {
     return htmlRegex.match(text).hasMatch();
 }
 
-mainWindow::mainWindow(QWidget *parent) : QWidget(parent), ui(new Ui::mainWindow) {
+serialWindow::serialWindow(QWidget *parent) : QWidget(parent), ui(new Ui::serialWindow) {
     ui->setupUi(this);
 
     // // 颜色主题|最小化|最大化|关闭
@@ -100,7 +101,6 @@ mainWindow::mainWindow(QWidget *parent) : QWidget(parent), ui(new Ui::mainWindow
     ui->plainTextEdit_out->setReadOnly(true);
 
     ui->toggleswitch_open->setText("open");
-
     // 刷新串口按钮 在 ui->comboBox_port 右侧
     iconBtn_flush_ = new ElaIconButton{ElaIconType::ArrowRotateLeft, 17, 20, 20};
     ui->gridLayout->addWidget(iconBtn_flush_, 0, 2);
@@ -117,12 +117,12 @@ mainWindow::mainWindow(QWidget *parent) : QWidget(parent), ui(new Ui::mainWindow
     parser_ = std::make_unique<maddy::Parser>(config_);
 }
 
-mainWindow::~mainWindow() {
+serialWindow::~serialWindow() {
     serial_port_.close();
     delete ui;
 }
 
-void mainWindow::initComboBox() {
+void serialWindow::initComboBox() {
     ui->comboBox_port->setToolTip(tr("serial port"));
     // 刷新串口，更新状态
     refreshSerialPort();
@@ -153,7 +153,7 @@ void mainWindow::initComboBox() {
 }
 
 
-void mainWindow::initSignalSlots() {
+void serialWindow::initSignalSlots() {
     // 主题切换
     // connect(this, &ElaWidget::themeChangeButtonClicked, this, [&]() {
     //     eTheme->setThemeMode(
@@ -226,17 +226,17 @@ void mainWindow::initSignalSlots() {
     });
 
     // 清空 comboBox_port items
-    connect(this, &mainWindow::sigClearComboBoxPort, this, [this]() {
+    connect(this, &serialWindow::sigClearComboBoxPort, this, [this]() {
         ui->comboBox_port->clear();
     });
 
     // 添加 comboBox_port items
-    connect(this, &mainWindow::sigAddSerialPort, this, [this](const QString &item) {
+    connect(this, &serialWindow::sigAddSerialPort, this, [this](const QString &item) {
         ui->comboBox_port->addItem(item);
     });
 
     // 收到串口数据
-    connect(this, &mainWindow::sigSerialPortData, this, [this](const QString &msg) {
+    connect(this, &serialWindow::sigSerialPortData, this, [this](const QString &msg) {
         if (show_type_ == TEXT) {
             ui->plainTextEdit_out->moveCursor(QTextCursor::End);
             ui->plainTextEdit_out->insertPlainText(msg);
@@ -309,11 +309,11 @@ void mainWindow::initSignalSlots() {
     serial_port_.connectReadEvent(this);
 
     // 刷新串口状态
-    connect(iconBtn_flush_, &ElaIconButton::clicked, this, &mainWindow::refreshSerialPort);
+    connect(iconBtn_flush_, &ElaIconButton::clicked, this, &serialWindow::refreshSerialPort);
 }
 
 
-void mainWindow::onReadEvent(const char *portName, unsigned int readBufferLen) {
+void serialWindow::onReadEvent(const char *portName, unsigned int readBufferLen) {
     if (readBufferLen > 0) {
         int recLen = 0;
         char *str = nullptr;
@@ -334,7 +334,7 @@ void mainWindow::onReadEvent(const char *portName, unsigned int readBufferLen) {
     }
 }
 
-void mainWindow::refreshSerialPort() {
+void serialWindow::refreshSerialPort() {
     // 获取可用串口list
     std::vector<SerialPortInfo> portNameList = CSerialPortInfo::availablePortInfos();
     ui->comboBox_port->clear();

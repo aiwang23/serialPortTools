@@ -97,7 +97,7 @@ void tabWindow::newSerialWindow() {
     dialog.exec();
     QString text = dialog.getInputText();
     if (not text.isEmpty()) {
-        auto *w = new mainWindow;
+        auto *w = new serialWindow;
         int idx = ui->tabWidget->addTab(w, text);
         ui->tabWidget->setCurrentIndex(idx);
         // 开场白

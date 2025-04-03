@@ -28,9 +28,9 @@ find_package(Qt6 COMPONENTS
         REQUIRED)
 
 add_executable(serialPortTools main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
+        serialwindow.cpp
+        serialwindow.h
+        serialwindow.ui
         tabwindow.cpp
         tabwindow.h
         tabwindow.ui

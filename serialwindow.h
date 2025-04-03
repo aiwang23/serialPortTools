@@ -9,6 +9,7 @@
 #include <CSerialPort/SerialPort.h>
 
 class ElaIconButton;
+class ElaToggleButton;
 
 namespace maddy {
     class Parser;
@@ -34,20 +35,19 @@ using itas109::CSerialPort;
 QT_BEGIN_NAMESPACE
 
 namespace Ui {
-    class mainWindow;
+    class serialWindow;
 }
 
 QT_END_NAMESPACE
 
 // serial window
-// TODO: 后面把 mainWindow 改为 serialWindow
-class mainWindow : public QWidget, public CSerialPortListener {
+class serialWindow : public QWidget, public CSerialPortListener {
     Q_OBJECT
 
 public:
-    explicit mainWindow(QWidget *parent = nullptr);
+    explicit serialWindow(QWidget *parent = nullptr);
 
-    ~mainWindow() override;
+    ~serialWindow() override;
 
 private:
     void initComboBox();
@@ -68,14 +68,13 @@ private Q_SLOTS:
     void refreshSerialPort();
 
 private:
-    Ui::mainWindow *ui;
+    Ui::serialWindow *ui;
     CSerialPort serial_port_;
     showType show_type_ = showType::TEXT;
 
     // markdown 转 html
     std::shared_ptr<maddy::ParserConfig> config_;
     std::unique_ptr<maddy::Parser> parser_;
-
     ElaIconButton *iconBtn_flush_;
 };
 

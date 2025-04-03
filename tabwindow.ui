@@ -22,7 +22,7 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="mainWindow" name="tab_hello">
+     <widget class="serialWindow" name="tab_hello">
       <attribute name="title">
        <string>hello</string>
       </attribute>
@@ -39,9 +39,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>mainWindow</class>
+   <class>serialWindow</class>
    <extends>QWidget</extends>
-   <header location="global">mainwindow.h</header>
+   <header location="global">serialwindow.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

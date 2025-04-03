@@ -1,6 +1,6 @@
 #include <QApplication>
 #include <ElaApplication.h>
-#include "mainwindow.h"
+#include "serialwindow.h"
 #include "settingswindow.h"
 #include "tabwindow.h"
 
