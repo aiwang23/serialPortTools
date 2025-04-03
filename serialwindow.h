@@ -17,12 +17,11 @@ namespace maddy {
 }
 
 // 输出框渲染类型
-enum showType { NONE = -1, TEXT, BIN, HEX, MARKDOWN, HTML };
+enum showType { NONE = -1, TEXT, HEX, MARKDOWN, HTML };
 
 // string to showType
 inline showType showTypeFrom(const std::string &str) {
     if ("text" == str) return TEXT;
-    else if ("bin" == str) return BIN;
     else if ("hex" == str) return HEX;
     else if ("markdown" == str) return MARKDOWN;
     else if ("html" == str) return HTML;
@@ -54,6 +53,8 @@ private:
 
     void initSignalSlots();
 
+    void initText();
+
     // 接受serial data回调
     Q_SLOT void onReadEvent(const char *portName, unsigned int readBufferLen);
 
@@ -76,6 +77,7 @@ private:
     std::shared_ptr<maddy::ParserConfig> config_;
     std::unique_ptr<maddy::Parser> parser_;
     ElaIconButton *iconBtn_flush_;
+    bool isSendHex_ = false;
 };
 
 

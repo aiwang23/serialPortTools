@@ -5,9 +5,8 @@
 #ifndef SETTINGSWINDOW_H
 #define SETTINGSWINDOW_H
 
-#include <ElaWidget.h>
 #include <QWidget>
-
+#include <ElaScrollPage.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class settingsWindow; }

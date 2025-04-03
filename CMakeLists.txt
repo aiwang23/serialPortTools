@@ -31,15 +31,17 @@ add_executable(serialPortTools main.cpp
         serialwindow.cpp
         serialwindow.h
         serialwindow.ui
-        tabwindow.cpp
-        tabwindow.h
-        tabwindow.ui
+        mainwindow.cpp
+        mainwindow.h
+        mainwindow.ui
         inputdialog.cpp
         inputdialog.h
         inputdialog.ui
         settingswindow.cpp
         settingswindow.h
         settingswindow.ui
+        outTextEdit.cpp
+        outTextEdit.h
 )
 
 target_link_libraries(serialPortTools

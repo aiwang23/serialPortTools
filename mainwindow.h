@@ -11,15 +11,20 @@
 
 class ElaIconButton;
 QT_BEGIN_NAMESPACE
-namespace Ui { class tabWindow; }
+
+namespace Ui {
+    class mainWindow;
+}
+
 QT_END_NAMESPACE
 
-class tabWindow : public ElaWidget {
-Q_OBJECT
+class mainWindow : public ElaWidget {
+    Q_OBJECT
 
 public:
-    explicit tabWindow(QWidget *parent = nullptr);
-    ~tabWindow() override;
+    explicit mainWindow(QWidget *parent = nullptr);
+
+    ~mainWindow() override;
 
     void initSignalSlots();
 
@@ -27,7 +32,7 @@ public Q_SLOTS:
     Q_SLOT void newSerialWindow();
 
 private:
-    Ui::tabWindow *ui;
+    Ui::mainWindow *ui;
     ElaIconButton *new_icon_button_;
     ElaIconButton *more_icon_button_;
 };

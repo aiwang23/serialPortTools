@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>tabWindow</class>
- <widget class="QWidget" name="tabWindow">
+ <class>mainWindow</class>
+ <widget class="QWidget" name="mainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -33,15 +33,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ElaTabWidget</class>
-   <extends>QTabWidget</extends>
-   <header location="global">ElaTabWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>serialWindow</class>
    <extends>QWidget</extends>
    <header location="global">serialwindow.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ElaTabWidget</class>
+   <extends>QTabWidget</extends>
+   <header location="global">ElaTabWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

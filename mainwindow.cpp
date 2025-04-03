@@ -4,11 +4,11 @@
 
 // You may need to build the project (run Qt uic code generator) to get "ui_tabWindow.h" resolved
 
-#include "tabwindow.h"
+#include "mainwindow.h"
 
 #include <qtabbar.h>
 
-#include "ui_tabWindow.h"
+#include "ui_mainWindow.h"
 #include <ElaIconButton.h>
 #include <ElaContentDialog.h>
 #include <ElaMessageBar.h>
@@ -20,7 +20,7 @@
 
 #include "settingswindow.h"
 
-tabWindow::tabWindow(QWidget *parent) : ElaWidget(parent), ui(new Ui::tabWindow) {
+mainWindow::mainWindow(QWidget *parent) : ElaWidget(parent), ui(new Ui::mainWindow) {
     ui->setupUi(this);
 
     setWindowTitle("serialPortTools");
@@ -31,15 +31,15 @@ tabWindow::tabWindow(QWidget *parent) : ElaWidget(parent), ui(new Ui::tabWindow)
         ElaAppBarType::MaximizeButtonHint |
         ElaAppBarType::CloseButtonHint
     );
+    // 无边框
     ui->tabWidget->setStyleSheet("QTabWidget::pane{border:none;}");
 
-    auto *widget = new QWidget(this);
+    QWidget *widget = new QWidget;
     auto *hbox = new QHBoxLayout(widget);
     new_icon_button_ = new ElaIconButton{ElaIconType::PlusLarge, 20, 30, 30};
     more_icon_button_ = new ElaIconButton{ElaIconType::AngleDown, 23, 30, 30};
     hbox->addWidget(new_icon_button_);
     hbox->addWidget(more_icon_button_);
-    // widget->setStyleSheet("QWidget::pane{border:none;}");
     ui->tabWidget->setCornerWidget(widget);
 
     // 开场白
@@ -52,11 +52,11 @@ tabWindow::tabWindow(QWidget *parent) : ElaWidget(parent), ui(new Ui::tabWindow)
     moveToCenter();
 }
 
-tabWindow::~tabWindow() {
+mainWindow::~mainWindow() {
     delete ui;
 }
 
-void tabWindow::initSignalSlots() {
+void mainWindow::initSignalSlots() {
     // 主题切换
     connect(this, &ElaWidget::themeChangeButtonClicked, this, [&]() {
         eTheme->setThemeMode(
@@ -66,15 +66,16 @@ void tabWindow::initSignalSlots() {
         );
     });
 
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // 添加 serial window
-    connect(new_icon_button_, &QPushButton::clicked, this, &tabWindow::newSerialWindow);
+    connect(new_icon_button_, &QPushButton::clicked, this, &mainWindow::newSerialWindow);
 
     // add settings window
     connect(more_icon_button_, &QPushButton::clicked, this, [&]() {
         ElaMenu menu;
         auto serial_action = menu.addElaIconAction(ElaIconType::Plug, "serial");
         auto settings_action = menu.addElaIconAction(ElaIconType::Gear, tr("setting"));
-        connect(serial_action, &QAction::triggered, this, &tabWindow::newSerialWindow);
+        connect(serial_action, &QAction::triggered, this, &mainWindow::newSerialWindow);
         connect(settings_action, &QAction::triggered, this, [&]() {
             settingsWindow *w = new settingsWindow;
             int idx = ui->tabWidget->addTab(w, tr("setting"));
@@ -91,7 +92,7 @@ void tabWindow::initSignalSlots() {
     });
 }
 
-void tabWindow::newSerialWindow() {
+void mainWindow::newSerialWindow() {
     inputDialog dialog{QString("new window name")};
 
     dialog.exec();
@@ -100,9 +101,8 @@ void tabWindow::newSerialWindow() {
         auto *w = new serialWindow;
         int idx = ui->tabWidget->addTab(w, text);
         ui->tabWidget->setCurrentIndex(idx);
+
         // 开场白
         ElaMessageBar::information(ElaMessageBarType::TopLeft, "info", "new window succeed", 2000, this);
     }
 }
-
-

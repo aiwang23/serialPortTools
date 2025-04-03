@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>569</width>
+    <height>415</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,7 +15,26 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <widget class="ElaPlainTextEdit" name="plainTextEdit"/>
+    <widget class="ElaScrollArea" name="scrollArea">
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>549</width>
+        <height>395</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <widget class="ElaPlainTextEdit" name="plainTextEdit"/>
+       </item>
+      </layout>
+     </widget>
+    </widget>
    </item>
   </layout>
  </widget>
@@ -24,6 +43,12 @@
    <class>ElaPlainTextEdit</class>
    <extends>QPlainTextEdit</extends>
    <header location="global">ElaPlainTextEdit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ElaScrollArea</class>
+   <extends>QScrollArea</extends>
+   <header location="global">ElaScrollArea.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

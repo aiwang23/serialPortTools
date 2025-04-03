@@ -8,25 +8,28 @@
 #include "ui_settingsWindow.h"
 
 
-settingsWindow::settingsWindow(QWidget *parent) :
-    QWidget(parent), ui(new Ui::settingsWindow) {
+settingsWindow::settingsWindow(QWidget *parent) : QWidget(parent), ui(new Ui::settingsWindow) {
     ui->setupUi(this);
 
     setWindowFlags(Qt::FramelessWindowHint);
     setWindowTitle("");
-    // setWindowButtonFlags({});
-    setAttribute(Qt::WA_TranslucentBackground);
 
-    QString html_about = R"(    <h1>about</h1>
+    QString html_about = R"(<h1>about</h1>
+    <p> https://github.com/aiwang23/serialPortTools </p>
     <p> version: 1.0.0</p>
     <p>Open Source License: MIT</p>
     <p> Third party libraries:</p>
-    <ul>
-        <li>https://github.com/Liniyous/ElaWidgetTools</li>
-        <li>https://github.com/itas109/CSerialPort</li>
-        <li>https://github.com/qt</li>
-    </ul>)";
+        <h4> 1.https://github.com/Liniyous/ElaWidgetTools</h4>
+        <h4> 2.https://github.com/itas109/CSerialPort</h4>
+        <h4> 3.https://github.com/qt</h4>
+        <h4> 4.https://github.com/progsource/maddy</h4>
+    )";
     ui->plainTextEdit->appendHtml(html_about);
+    // 只读
+    ui->plainTextEdit->setReadOnly(true);
+
+    // 无边框
+    ui->scrollArea->setStyleSheet("border:none;");
 }
 
 settingsWindow::~settingsWindow() {
