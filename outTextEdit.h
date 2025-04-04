@@ -8,6 +8,8 @@
 
 
 class outTextEdit : public ElaPlainTextEdit {
+    Q_OBJECT
+
 public:
     explicit outTextEdit(QWidget *parent = nullptr);
 

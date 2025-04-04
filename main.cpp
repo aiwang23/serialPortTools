@@ -9,8 +9,8 @@ int main(int argc, char *argv[]) {
     eApp->init();
     // mainWindow w;
     // w.show();
-    mainWindow tab;
-    tab.show();
+    mainWindow w;
+    w.show();
     // settingsWindow w;
     // w.show();
     return QApplication::exec();

@@ -42,6 +42,8 @@ add_executable(serialPortTools main.cpp
         settingswindow.ui
         outTextEdit.cpp
         outTextEdit.h
+        threadPool.h
+        concurrentqueue.h
 )
 
 target_link_libraries(serialPortTools
