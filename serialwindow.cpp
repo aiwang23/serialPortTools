@@ -179,6 +179,9 @@ serialWindow::serialWindow(QWidget *parent)
 
     // 只读 不可编辑
     ui->plainTextEdit_out->setReadOnly(true);
+    // TODO: Ela 这个似乎有bug, 要把ObjectName的名称改回这个"ElaPlainTextEdit"才能正常使用深色模式
+    ui->plainTextEdit_out->setObjectName("ElaPlainTextEdit");
+    ui->plainTextEdit_in->setObjectName("ElaPlainTextEdit");
 
     ui->toggleswitch_open->setText("open");
     // 开始按钮的默认大小
