@@ -44,6 +44,14 @@ add_executable(serialPortTools main.cpp
         outTextEdit.h
         threadPool.h
         concurrentqueue.h
+
+        cmdwidget.cpp
+        cmdwidget.h
+        cmdwidget.ui
+        cmdlineedit.cpp
+        cmdlineedit.h
+        cmdlineedit.ui
+
 )
 
 target_link_libraries(serialPortTools

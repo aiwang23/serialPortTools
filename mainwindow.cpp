@@ -17,8 +17,30 @@
 
 #include "inputdialog.h"
 #include <ELaMenu.h>
+#include <QSettings>
 
 #include "settingswindow.h"
+
+static bool isSystemDarkTheme() {
+    // 1. 先检查调色板（通用方法）
+    bool isDark = QGuiApplication::palette().color(QPalette::Window).lightness() < 128;
+
+    // 2. 平台特定检测（覆盖通用结果）
+#ifdef Q_OS_WIN
+    QSettings registry("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+                       QSettings::NativeFormat);
+    isDark = registry.value("AppsUseLightTheme", 1).toInt() == 0;
+#elif defined(Q_OS_MACOS)
+    QSettings settings("Apple Global Domain", QSettings::NativeFormat);
+    isDark = settings.value("AppleInterfaceStyle").toString().toLower() == "dark";
+#elif defined(Q_OS_LINUX)
+    if (qEnvironmentVariableIsSet("GTK_THEME")) {
+        isDark = QString(qgetenv("GTK_THEME")).contains("dark", Qt::CaseInsensitive);
+    }
+#endif
+
+    return isDark;
+}
 
 mainWindow::mainWindow(QWidget *parent) : ElaWidget(parent), ui(new Ui::mainWindow) {
     ui->setupUi(this);
@@ -31,8 +53,6 @@ mainWindow::mainWindow(QWidget *parent) : ElaWidget(parent), ui(new Ui::mainWind
         ElaAppBarType::MaximizeButtonHint |
         ElaAppBarType::CloseButtonHint
     );
-    // 无边框
-    ui->tabWidget->setStyleSheet("QTabWidget::pane{border:none;}");
 
     QWidget *widget = new QWidget;
     auto *hbox = new QHBoxLayout(widget);
@@ -41,6 +61,12 @@ mainWindow::mainWindow(QWidget *parent) : ElaWidget(parent), ui(new Ui::mainWind
     hbox->addWidget(new_icon_button_);
     hbox->addWidget(more_icon_button_);
     ui->tabWidget->setCornerWidget(widget);
+    ui->tabWidget->setObjectName("ElaTabWidget");
+    setObjectName("ElaWidget");
+
+    eTheme->setThemeMode(
+        true == isSystemDarkTheme() ? ElaThemeType::Dark : ElaThemeType::Light
+    );
 
     // 开场白
     ElaMessageBar::information(ElaMessageBarType::TopLeft, "hello", "welcome", 2000, this);
@@ -66,7 +92,6 @@ void mainWindow::initSignalSlots() {
         );
     });
 
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // 添加 serial window
     connect(new_icon_button_, &QPushButton::clicked, this, &mainWindow::newSerialWindow);
 

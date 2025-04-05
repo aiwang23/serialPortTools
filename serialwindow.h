@@ -20,15 +20,24 @@ namespace maddy {
 }
 
 // 输出框渲染类型
-enum dataType { NONE = -1, TEXT, HEX, MARKDOWN, HTML };
+enum class dataType { NONE = -1, TEXT, HEX, MARKDOWN, HTML };
 
 // string to showType
 inline dataType dataTypeFrom(const std::string &str) {
-    if ("text" == str) return TEXT;
-    else if ("hex" == str) return HEX;
-    else if ("markdown" == str) return MARKDOWN;
-    else if ("html" == str) return HTML;
-    else return NONE;
+    if ("text" == str) return dataType::TEXT;
+    else if ("hex" == str) return dataType::HEX;
+    else if ("markdown" == str) return dataType::MARKDOWN;
+    else if ("html" == str) return dataType::HTML;
+    else return dataType::NONE;
+}
+
+enum class sendMode { NONE = -1, MAN, AUTO, CMD };
+
+inline sendMode sendModeFrom(const std::string &str) {
+    if ("MAN" == str) return sendMode::MAN;
+    else if ("AUTO" == str) return sendMode::AUTO;
+    else if ("CMD" == str) return sendMode::CMD;
+    else return sendMode::NONE;
 }
 
 using itas109::CSerialPortListener;
@@ -72,11 +81,16 @@ Q_SIGNALS:
     // 从串口读取后 并经过处理后 的数据
     Q_SIGNAL void sigDataCompleted(QString data);
 
+    Q_SIGNAL void sigSendData(QString data);
+
 private Q_SLOTS:
     Q_SLOT void refreshSerialPort();
 
     // 收到数据后 进行处理 处理完后 直接显示
     Q_SLOT void convertDataAndSend(const QString &data);
+
+    // 发送数据到串口
+    Q_SLOT void sendDataToSerial(QString data);
 
 public Q_SLOT:
     Q_SLOT void hideSecondaryWindow();
@@ -88,6 +102,7 @@ private:
     CSerialPort serial_port_;
     dataType show_type_ = dataType::TEXT;
     dataType send_type_ = dataType::TEXT;
+    sendMode send_mode_ = sendMode::MAN;
 
     // markdown 转 html
     std::shared_ptr<maddy::ParserConfig> config_;
@@ -98,6 +113,8 @@ private:
     std::atomic_bool isStop_ = false;
     moodycamel::ConcurrentQueue<QString> data_queue_;
 };
+
+
 
 
 #endif //MAINWINDOW_H

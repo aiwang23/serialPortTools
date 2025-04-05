@@ -27,9 +27,8 @@ settingsWindow::settingsWindow(QWidget *parent) : QWidget(parent), ui(new Ui::se
     ui->plainTextEdit->appendHtml(html_about);
     // 只读
     ui->plainTextEdit->setReadOnly(true);
-
-    // 无边框
-    ui->scrollArea->setStyleSheet("border:none;");
+    ui->plainTextEdit->setObjectName("ElaPlainTextEdit");
+    ui->scrollArea->setObjectName("ElaScrollArea");
 }
 
 settingsWindow::~settingsWindow() {

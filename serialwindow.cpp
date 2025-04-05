@@ -190,6 +190,15 @@ serialWindow::serialWindow(QWidget *parent)
     iconBtn_refresh_ = new ElaIconButton{ElaIconType::ArrowRotateLeft, 17, 20, 20};
     ui->horizontalLayout_0->addWidget(iconBtn_refresh_);
 
+    // 默认状态下 输出窗口比例40%，输入窗口占30%
+    ui->splitter_data->setStretchFactor(0, 70);
+    ui->splitter_data->setStretchFactor(1, 30);
+
+    // 默认 MAN 手动模式
+    ui->cmdwidget->hide();
+    ui->plainTextEdit_in->show();
+    ui->pushButton_send->show();
+
     // 初始化 combobox 组件
     initComboBox();
     // 初始化 text 组件
@@ -243,6 +252,10 @@ void serialWindow::initComboBox() {
     ui->comboBox_send_type->addItems(
         {"text", "hex"}
     );
+
+    ui->comboBox_send_mode->addItems(
+        {"MAN", "CMD", "AUTO"}
+    );
 }
 
 
@@ -295,36 +308,8 @@ void serialWindow::initSignalSlots() {
 
     // 发送串口
     connect(ui->pushButton_send, &QPushButton::clicked, this, [&]() {
-        if (serial_port_.isOpen()) {
-            // 串口正常打开
-            QString sendStr = ui->plainTextEdit_in->toPlainText();
-            // 16进制发送
-            if (send_type_ == HEX) {
-                // 按照 '\n' '\r' ' ' 来切割
-                QStringList strList = highPerformanceSplit(sendStr);
-                std::string tmp;
-                tmp.reserve(sendStr.size());
-                for (const QString &str: strList) {
-                    tmp += removePrefix(str.toStdString());
-                }
-                std::string bin;
-                int rs = hexToBinary(tmp, bin);
-                if (-1 == rs) {
-                    ElaMessageBar::error(ElaMessageBarType::TopLeft, "error", "invalid hex data", 4000, this);
-                    return;
-                }
-                sendStr = QString::fromStdString(bin);
-            }
-            // 正常发送 文本发送
-            QByteArray ba = sendStr.toLocal8Bit();
-            const char *s = ba.constData();
-            // 支持中文并获取正确的长度
-            serial_port_.writeData(s, ba.length());
-        } else {
-            // 串口没有打开
-            // QMessageBox::information(NULL,tr("information"),tr("please open serial port first"));
-            ElaMessageBar::error(ElaMessageBarType::TopLeft, "error", tr("please open serial port first"), 3000, this);
-        }
+        QString data = ui->plainTextEdit_in->toPlainText();
+        emit sigSendData(data);
     });
 
     // 清空 comboBox_port items
@@ -339,31 +324,49 @@ void serialWindow::initSignalSlots() {
 
     // 处理完数据，插入到 plainTextEdit_out
     connect(this, &serialWindow::sigDataCompleted, this, [this](const QString &data) {
-        if (TEXT == show_type_) {
+        if (dataType::TEXT == show_type_) {
             ui->plainTextEdit_out->moveCursor(QTextCursor::End);
             ui->plainTextEdit_out->insertPlainText(data);
-        } else if (HEX == show_type_) {
+        } else if (dataType::HEX == show_type_) {
             ui->plainTextEdit_out->moveCursor(QTextCursor::End);
             ui->plainTextEdit_out->insertPlainText(data);
-        } else if (HTML == show_type_) {
+        } else if (dataType::HTML == show_type_) {
             ui->plainTextEdit_out->appendHtml(data);
-        } else if (MARKDOWN == show_type_) {
+        } else if (dataType::MARKDOWN == show_type_) {
             ui->plainTextEdit_out->appendHtml(data);
         }
     });
 
     // 显示类型切换
     connect(ui->comboBox_show_type, &QComboBox::currentTextChanged, this, [this](QString item) {
-        if (dataTypeFrom(item.toStdString()) == TEXT) {
-            show_type_ = TEXT;
-        } else if (dataTypeFrom(item.toStdString()) == HEX) {
-            show_type_ = HEX;
-        } else if (dataTypeFrom(item.toStdString()) == MARKDOWN) {
-            show_type_ = MARKDOWN;
-        } else if (dataTypeFrom(item.toStdString()) == HTML) {
-            show_type_ = HTML;
+        // if (dataTypeFrom(item.toStdString()) == dataType::TEXT) {
+        //     show_type_ = dataType::TEXT;
+        // } else if (dataTypeFrom(item.toStdString()) == dataType::HEX) {
+        //     show_type_ = dataType::HEX;
+        // } else if (dataTypeFrom(item.toStdString()) == dataType::MARKDOWN) {
+        //     show_type_ = dataType::MARKDOWN;
+        // } else if (dataTypeFrom(item.toStdString()) == dataType::HTML) {
+        //     show_type_ = dataType::HTML;
+        // }
+        show_type_ = dataTypeFrom(item.toStdString());
+    });
+
+    connect(ui->comboBox_send_mode, &QComboBox::currentTextChanged, this, [this](QString item) {
+        send_mode_ = sendModeFrom(item.toStdString());
+        if (sendMode::MAN == send_mode_) {
+            ui->cmdwidget->hide();
+            ui->plainTextEdit_in->show();
+            ui->pushButton_send->show();
+        } else if (sendMode::CMD == send_mode_) {
+            ui->cmdwidget->show();
+            ui->plainTextEdit_in->hide();
+            ui->pushButton_send->hide();
         }
     });
+
+    connect(ui->cmdwidget, &cmdWidget::sigCmdSend, this, &serialWindow::sigSendData);
+
+    connect(this, &serialWindow::sigSendData, this, &serialWindow::sendDataToSerial);
 
     // 接受serial onReadEvent初始化
     serial_port_.connectReadEvent(this);
@@ -410,10 +413,10 @@ void serialWindow::initSignalSlots() {
 
     // 发送类型切换
     connect(ui->comboBox_send_type, &ElaComboBox::currentTextChanged, this, [this](const QString &item) {
-        if (dataTypeFrom(item.toStdString()) == TEXT) {
-            send_type_ = TEXT;
-        } else if (dataTypeFrom(item.toStdString()) == HEX) {
-            send_type_ = HEX;
+        if (dataTypeFrom(item.toStdString()) == dataType::TEXT) {
+            send_type_ = dataType::TEXT;
+        } else if (dataTypeFrom(item.toStdString()) == dataType::HEX) {
+            send_type_ = dataType::HEX;
         }
     });
 }
@@ -426,6 +429,7 @@ void serialWindow::initText() {
     ui->label_stopbit->setTextPixelSize(13);
     ui->label_show_type->setTextPixelSize(13);
     ui->label_send_type->setTextPixelSize(13);
+    ui->label_send_mode->setTextPixelSize(13);
 }
 
 
@@ -461,14 +465,14 @@ void serialWindow::refreshSerialPort() {
 }
 
 void serialWindow::convertDataAndSend(const QString &data) {
-    if (show_type_ == TEXT) {
+    if (dataType::TEXT == show_type_) {
         // 文本
         // ui->plainTextEdit_out->moveCursor(QTextCursor::End);
         // ui->plainTextEdit_out->insertPlainText(data);
         emit sigDataCompleted(data);
-    } else if (show_type_ == HEX) {
+    } else if (dataType::HEX == show_type_) {
         emit sigDataCompleted(data.toLocal8Bit().toHex() + " "); // 添加空格分隔符提高可读性
-    } else if (show_type_ == HTML) {
+    } else if (dataType::HTML == show_type_) {
         // HTML
         static QString lastLine;
         QStringList lines = data.split("\n");
@@ -485,7 +489,7 @@ void serialWindow::convertDataAndSend(const QString &data) {
             emit sigDataCompleted(lastLine);
             lastLine = "";
         }
-    } else if (show_type_ == MARKDOWN) {
+    } else if (dataType::MARKDOWN == show_type_) {
         // markdown
         static QString lastLine;
         std::stringstream strSt;
@@ -500,6 +504,39 @@ void serialWindow::convertDataAndSend(const QString &data) {
         // ui->plainTextEdit_out->appendHtml(QString::fromStdString(html));
         emit sigDataCompleted(QString::fromStdString(html));
         lastLine = lines.back();
+    }
+}
+
+void serialWindow::sendDataToSerial(QString data) {
+    if (serial_port_.isOpen()) {
+        // 串口正常打开
+        QString sendStr = ui->plainTextEdit_in->toPlainText();
+        // 16进制发送
+        if (send_type_ == dataType::HEX) {
+            // 按照 '\n' '\r' ' ' 来切割
+            QStringList strList = highPerformanceSplit(sendStr);
+            std::string tmp;
+            tmp.reserve(sendStr.size());
+            for (const QString &str: strList) {
+                tmp += removePrefix(str.toStdString());
+            }
+            std::string bin;
+            int rs = hexToBinary(tmp, bin);
+            if (-1 == rs) {
+                ElaMessageBar::error(ElaMessageBarType::TopLeft, "error", "invalid hex data", 4000, this);
+                return;
+            }
+            sendStr = QString::fromStdString(bin);
+        }
+        // 正常发送 文本发送
+        QByteArray ba = sendStr.toLocal8Bit();
+        const char *s = ba.constData();
+        // 支持中文并获取正确的长度
+        serial_port_.writeData(s, ba.length());
+    } else {
+        // 串口没有打开
+        // QMessageBox::information(NULL,tr("information"),tr("please open serial port first"));
+        ElaMessageBar::error(ElaMessageBarType::TopLeft, "error", tr("please open serial port first"), 3000, this);
     }
 }
 

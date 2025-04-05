@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>710</width>
-    <height>463</height>
+    <width>753</width>
+    <height>608</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <item row="0" column="0">
     <widget class="ElaTabWidget" name="tabWidget">
      <property name="styleSheet">
-      <string notr="true"/>
+      <string notr="true">QTabWidget::pane{border:none;}</string>
      </property>
      <property name="currentIndex">
       <number>0</number>

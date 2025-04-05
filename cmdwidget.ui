@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>settingsWindow</class>
- <widget class="QWidget" name="settingsWindow">
+ <class>cmdWidget</class>
+ <widget class="QWidget" name="cmdWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>569</width>
-    <height>415</height>
+    <width>400</width>
+    <height>300</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>settingsWindow</string>
+   <string>cmdWidget</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">#settingsWindow{background-color:transparent;border:0px;}</string>
+   <string notr="true">#cmdWidget{background-color:transparent;border:0px;}</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
     <widget class="ElaScrollArea" name="scrollArea">
      <property name="widgetResizable">
       <bool>true</bool>
@@ -27,16 +27,20 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>549</width>
-        <height>395</height>
+        <width>380</width>
+        <height>280</height>
        </rect>
       </property>
       <property name="styleSheet">
        <string notr="true">#scrollAreaWidgetContents{background-color:transparent;border:0px;}</string>
       </property>
-      <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="0">
-        <widget class="ElaPlainTextEdit" name="plainTextEdit"/>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="cmdLineEdit" name="edit_first" native="true">
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -46,9 +50,10 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ElaPlainTextEdit</class>
-   <extends>QPlainTextEdit</extends>
-   <header location="global">ElaPlainTextEdit.h</header>
+   <class>cmdLineEdit</class>
+   <extends>QWidget</extends>
+   <header location="global">cmdlineedit.h</header>
+   <container>1</container>
   </customwidget>
   <customwidget>
    <class>ElaScrollArea</class>
