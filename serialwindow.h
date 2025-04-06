@@ -6,6 +6,7 @@
 #define MAINWINDOW_H
 
 #include <ElaWidget.h>
+#include <QTimer>
 #include <CSerialPort/SerialPort.h>
 
 #include "threadPool.h"
@@ -112,9 +113,12 @@ private:
     ThreadPool threadPool_;
     std::atomic_bool isStop_ = false;
     moodycamel::ConcurrentQueue<QString> data_queue_;
+
+    // 数据窗口比例 MAN模式 CMD模式
+    std::unordered_map<sendMode, QList<int> > dataWidgetRatio_;
+    float animationProgress = 0;
+    QTimer *animationTimer;
 };
-
-
 
 
 #endif //MAINWINDOW_H

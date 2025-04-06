@@ -67,6 +67,9 @@ void cmdWidget::addOrRemoveLine(cmdLineEdit *edit) {
 
             connect(newEdit, &cmdLineEdit::sigCmdSend, this, &cmdWidget::sigCmdSend);
             connect(newEdit, &cmdLineEdit::sigStatusChanged, this, &cmdWidget::addOrRemoveLine);
+
+            QFocusEvent focusEvent(QEvent::FocusIn, Qt::MouseFocusReason);
+            QCoreApplication::sendEvent(newEdit, &focusEvent);
         }
     }
 }

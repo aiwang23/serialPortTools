@@ -22,6 +22,7 @@
 #include <QFileDialog>
 #include <utility>
 #include "threadPool.h"
+#include <QPropertyAnimation>
 
 using itas109::CSerialPortInfo;
 using itas109::SerialPortInfo;
@@ -190,14 +191,25 @@ serialWindow::serialWindow(QWidget *parent)
     iconBtn_refresh_ = new ElaIconButton{ElaIconType::ArrowRotateLeft, 17, 20, 20};
     ui->horizontalLayout_0->addWidget(iconBtn_refresh_);
 
-    // 默认状态下 输出窗口比例40%，输入窗口占30%
-    ui->splitter_data->setStretchFactor(0, 70);
-    ui->splitter_data->setStretchFactor(1, 30);
-
     // 默认 MAN 手动模式
     ui->cmdwidget->hide();
     ui->plainTextEdit_in->show();
     ui->pushButton_send->show();
+
+    dataWidgetRatio_ = {
+        {
+            sendMode::MAN, {int(7 * ui->splitter_data->height()), int(3 * ui->splitter_data->height())}
+        },
+        {
+            sendMode::CMD, {int(5 * ui->splitter_data->height()), int(5 * ui->splitter_data->height())}
+        }
+    };
+    // 切换发送模式的动画计时器
+    animationTimer = new QTimer(this);
+    animationTimer->setInterval(16); // ~60 FPS
+
+    // 默认状态下 输出窗口比例70%，输入窗口占30%
+    ui->splitter_data->setSizes(dataWidgetRatio_[sendMode::MAN]);
 
     // 初始化 combobox 组件
     initComboBox();
@@ -338,30 +350,54 @@ void serialWindow::initSignalSlots() {
     });
 
     // 显示类型切换
-    connect(ui->comboBox_show_type, &QComboBox::currentTextChanged, this, [this](QString item) {
-        // if (dataTypeFrom(item.toStdString()) == dataType::TEXT) {
-        //     show_type_ = dataType::TEXT;
-        // } else if (dataTypeFrom(item.toStdString()) == dataType::HEX) {
-        //     show_type_ = dataType::HEX;
-        // } else if (dataTypeFrom(item.toStdString()) == dataType::MARKDOWN) {
-        //     show_type_ = dataType::MARKDOWN;
-        // } else if (dataTypeFrom(item.toStdString()) == dataType::HTML) {
-        //     show_type_ = dataType::HTML;
-        // }
+    connect(ui->comboBox_show_type, &ElaComboBox::currentTextChanged, this, [this](const QString &item) {
         show_type_ = dataTypeFrom(item.toStdString());
     });
 
-    connect(ui->comboBox_send_mode, &QComboBox::currentTextChanged, this, [this](QString item) {
+    // 发送模式切换
+    connect(ui->comboBox_send_mode, &ElaComboBox::currentTextChanged, this, [this](const QString &item) {
         send_mode_ = sendModeFrom(item.toStdString());
         if (sendMode::MAN == send_mode_) {
             ui->cmdwidget->hide();
             ui->plainTextEdit_in->show();
             ui->pushButton_send->show();
+
+            // 重置动画进度
+            animationProgress = 0;
+            animationTimer->start();
+
+            // ui->splitter_data->setSizes(dataWidgetRatio_["MAN"]);
         } else if (sendMode::CMD == send_mode_) {
             ui->cmdwidget->show();
             ui->plainTextEdit_in->hide();
             ui->pushButton_send->hide();
+
+            // 重置动画进度
+            animationProgress = 0;
+            animationTimer->start();
+
+            // ui->splitter_data->setSizes(dataWidgetRatio_["CMD"]);
         }
+    });
+
+    connect(animationTimer, &QTimer::timeout, this, [this]() {
+        animationProgress += 0.02; // 每帧增加2%的进度
+        // 获取当前尺寸
+        QList<int> currentSizes = ui->splitter_data->sizes();
+        // 计算目标尺寸
+        QList<int> targetSizes = dataWidgetRatio_[send_mode_];
+
+        if (animationProgress >= 1.0) {
+            animationProgress = 1.0;
+            animationTimer->stop();
+        }
+
+        // 计算中间值
+        QList<int> intermediateSizes;
+        intermediateSizes << currentSizes[0] + (targetSizes[0] - currentSizes[0]) * animationProgress
+                << currentSizes[1] + (targetSizes[1] - currentSizes[1]) * animationProgress;
+
+        ui->splitter_data->setSizes(intermediateSizes);
     });
 
     connect(ui->cmdwidget, &cmdWidget::sigCmdSend, this, &serialWindow::sigSendData);
