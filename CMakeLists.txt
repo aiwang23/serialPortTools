@@ -30,7 +30,8 @@ find_package(Qt6 COMPONENTS
         LinguistTools
         REQUIRED)
 
-add_executable(serialPortTools src/main.cpp
+add_executable(serialPortTools WIN32
+        src/main.cpp
         src/serialwindow.cpp
         src/serialwindow.h
         src/serialwindow.ui
