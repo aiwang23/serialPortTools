@@ -21,6 +21,7 @@
 
 #include "settingswindow.h"
 #include <QTranslator>
+#include <ElaToolButton.h>
 
 static bool isSystemDarkTheme() {
     // 1. 先检查调色板（通用方法）
@@ -68,13 +69,6 @@ mainWindow::mainWindow(QWidget *parent) : ElaWidget(parent), ui(new Ui::mainWind
         ElaAppBarType::CloseButtonHint
     );
 
-    QWidget *widget = new QWidget;
-    auto *hbox = new QHBoxLayout(widget);
-    new_icon_button_ = new ElaIconButton{ElaIconType::PlusLarge, 20, 30, 30};
-    more_icon_button_ = new ElaIconButton{ElaIconType::AngleDown, 23, 30, 30};
-    hbox->addWidget(new_icon_button_);
-    hbox->addWidget(more_icon_button_);
-    ui->tabWidget->setCornerWidget(widget);
     ui->tabWidget->setObjectName("ElaTabWidget");
     setObjectName("ElaWidget");
 
@@ -85,6 +79,7 @@ mainWindow::mainWindow(QWidget *parent) : ElaWidget(parent), ui(new Ui::mainWind
     // 开场白
     ElaMessageBar::information(ElaMessageBarType::TopLeft, tr("hello"), tr("welcome"), 2000, this);
 
+    initButton();
     // 连接signals slots
     initSignalSlots();
 
@@ -109,43 +104,6 @@ void mainWindow::initSignalSlots() {
     // 添加 serial window
     connect(new_icon_button_, &QPushButton::clicked, this, &mainWindow::newSerialWindow);
 
-    // add settings window
-    connect(more_icon_button_, &QPushButton::clicked, this, [&]() {
-        ElaMenu menu;
-        auto serial_action = menu.addElaIconAction(ElaIconType::Plug, tr("serial"));
-        auto settings_action = menu.addElaIconAction(ElaIconType::Gear, tr("setting"));
-        connect(serial_action, &QAction::triggered, this, &mainWindow::newSerialWindow);
-        connect(settings_action, &QAction::triggered, this, [&]() {
-            settingsWindow *w = new settingsWindow;
-            int idx = ui->tabWidget->addTab(w, tr("setting"));
-            ui->tabWidget->setCurrentIndex(idx);
-
-            connect(w, &settingsWindow::sigLanguageChanged, this, [this](QString language) {
-                // 移除旧的翻译器
-                QCoreApplication::removeTranslator(translator_);
-
-                // 加载新的语言文件
-                if (translator_->load(":/translations/" + language + ".qm")) {
-                    QCoreApplication::installTranslator(translator_);
-                } else {
-                    // 加载失败，回退到英语
-                    if (translator_->load(":/translations/en_US.qm")) {
-                        QCoreApplication::installTranslator(translator_);
-                    }
-                }
-
-                // 通知所有窗口重新翻译UI
-                QCoreApplication::postEvent(QCoreApplication::instance(),
-                                            new QEvent(QEvent::LanguageChange));
-                for (QWidget *widget: QApplication::allWidgets()) {
-                    widget->update();
-                }
-            });
-        });
-
-        menu.exec(QCursor::pos());
-    });
-
     // 剩余最后一个小窗格之后, 点击关闭，直接退出
     connect(ui->tabWidget, &ElaTabWidget::tabCloseRequested, this, [&]() {
         if (ui->tabWidget->count() <= 1)
@@ -165,6 +123,52 @@ void mainWindow::initSignalSlots() {
     }
 }
 
+void mainWindow::initButton() {
+    QWidget *widget = new QWidget;
+    QHBoxLayout *hbox = new QHBoxLayout(widget);
+    new_icon_button_ = new ElaIconButton{ElaIconType::PlusLarge, 15, 30, 30};
+    more_tools_button_ = new ElaToolButton;
+    hbox->addWidget(new_icon_button_);
+    hbox->addWidget(more_tools_button_);
+    ui->tabWidget->setCornerWidget(widget);
+
+    more_tools_button_->setFixedSize(30, 30);
+
+    more_menu_ = new ElaMenu;
+    auto serial_action = more_menu_->addElaIconAction(ElaIconType::Plug, tr("serial"));
+    auto settings_action = more_menu_->addElaIconAction(ElaIconType::Gear, tr("setting"));
+    connect(serial_action, &QAction::triggered, this, &mainWindow::newSerialWindow);
+    connect(settings_action, &QAction::triggered, this, [&]() {
+        settingsWindow *w = new settingsWindow;
+        int idx = ui->tabWidget->addTab(w, tr("setting"));
+        ui->tabWidget->setCurrentIndex(idx);
+
+        connect(w, &settingsWindow::sigLanguageChanged, this, [this](QString language) {
+            // 移除旧的翻译器
+            QCoreApplication::removeTranslator(translator_);
+
+            // 加载新的语言文件
+            if (translator_->load(":/translations/" + language + ".qm")) {
+                QCoreApplication::installTranslator(translator_);
+            } else {
+                // 加载失败，回退到英语
+                if (translator_->load(":/translations/en_US.qm")) {
+                    QCoreApplication::installTranslator(translator_);
+                }
+            }
+
+            // 通知所有窗口重新翻译UI
+            QCoreApplication::postEvent(QCoreApplication::instance(),
+                                        new QEvent(QEvent::LanguageChange));
+            for (QWidget *widget: QApplication::allWidgets()) {
+                widget->update();
+            }
+        });
+    });
+
+    more_tools_button_->setMenu(more_menu_);
+}
+
 void mainWindow::resizeEvent(QResizeEvent *event) {
     ElaWidget::resizeEvent(event);
     // 获取屏幕的宽度
@@ -182,13 +186,16 @@ void mainWindow::resizeEvent(QResizeEvent *event) {
 
 void mainWindow::changeEvent(QEvent *event) {
     if (event) {
-        switch (event->type()) {
-            // this event is send if a translator is loaded
-            case QEvent::LanguageChange:
-                ui->retranslateUi(this);
-                break;
-            default:
-                break;
+        if (QEvent::LanguageChange == event->type()) {
+            ui->retranslateUi(this);
+            int size = ui->tabWidget->count();
+            QString name;
+            for (int i = 0; i < size; ++i) {
+                name = ui->tabWidget->widget(i)->objectName();
+                if ("settingsWindow" == name) {
+                    ui->tabWidget->tabBar()->setTabText(i, tr("setting"));
+                }
+            }
         }
     }
 

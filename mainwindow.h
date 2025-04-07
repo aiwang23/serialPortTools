@@ -10,8 +10,10 @@
 #include <QWidget>
 
 
+class ElaMenu;
 class QTranslator;
 class ElaIconButton;
+class ElaToolButton;
 QT_BEGIN_NAMESPACE
 
 namespace Ui {
@@ -30,6 +32,8 @@ public:
 
     void initSignalSlots();
 
+    void initButton();
+
 protected:
     void resizeEvent(QResizeEvent *event) override;
 
@@ -46,7 +50,8 @@ public Q_SLOTS:
 private:
     Ui::mainWindow *ui;
     ElaIconButton *new_icon_button_;
-    ElaIconButton *more_icon_button_;
+    ElaToolButton *more_tools_button_;
+    ElaMenu* more_menu_;
     QTranslator *translator_;
 };
 

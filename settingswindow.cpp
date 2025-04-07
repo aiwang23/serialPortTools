@@ -11,6 +11,7 @@
 settingsWindow::settingsWindow(QWidget *parent) : QWidget(parent), ui(new Ui::settingsWindow) {
     ui->setupUi(this);
 
+    setObjectName("settingsWindow");
     setWindowFlags(Qt::FramelessWindowHint);
     setWindowTitle("");
 
@@ -23,6 +24,8 @@ settingsWindow::settingsWindow(QWidget *parent) : QWidget(parent), ui(new Ui::se
         <h4> 2.https://github.com/itas109/CSerialPort</h4>
         <h4> 3.https://github.com/qt</h4>
         <h4> 4.https://github.com/progsource/maddy</h4>
+        <h4> 5.https://github.com/cameron314/concurrentqueue</h4>
+        <h4> 6.https://github.com/progschj/ThreadPool</h4>
     )";
     ui->plainTextEdit->appendHtml(html_about);
     // 只读

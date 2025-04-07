@@ -49,38 +49,43 @@
     <message>
         <location filename="../mainwindow.ui" line="27"/>
         <location filename="../cmake-build-debug/serialPortTools_autogen/include/ui_mainWindow.h" line="56"/>
-        <location filename="../mainwindow.cpp" line="86"/>
+        <location filename="../mainwindow.cpp" line="80"/>
         <source>hello</source>
         <translation>你好</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="86"/>
+        <location filename="../mainwindow.cpp" line="80"/>
         <source>welcome</source>
         <translation>欢迎</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="115"/>
+        <location filename="../mainwindow.cpp" line="138"/>
         <source>serial</source>
         <translation>串口</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="116"/>
-        <location filename="../mainwindow.cpp" line="120"/>
+        <location filename="../mainwindow.cpp" line="139"/>
+        <location filename="../mainwindow.cpp" line="143"/>
+        <location filename="../mainwindow.cpp" line="196"/>
         <source>setting</source>
         <translation>设置</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="200"/>
+        <source>settings</source>
+        <translation type="vanished">设置</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="207"/>
         <source>new serial window</source>
         <translation>新建串口窗口</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="210"/>
+        <location filename="../mainwindow.cpp" line="217"/>
         <source>info</source>
         <translation>信息</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="210"/>
+        <location filename="../mainwindow.cpp" line="217"/>
         <source>new window succeed</source>
         <translation>新建窗口成功</translation>
     </message>

@@ -6,11 +6,11 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-include_directories(${CMAKE_SOURCE_DIR}/inc)
-include_directories(.)
-
+#! 请把这里修改成你的 Qt 路径
 set(CMAKE_PREFIX_PATH "C:/Soft/Qt/6.4.3/msvc2019_64/lib/cmake")
+#! 请把这里修改成你的 ElaWidgetTools 路径
 set(ELA_LIB_PATH "C:\\Soft\\ElaWidgetTools\\ElaWidgetTools")
+#! 请把这里修改成你的 CSerialPort 路径
 set(C_SERIAL_PORT_LIB_PATH "C:\\Soft\\CSerialPort")
 
 include_directories(${ELA_LIB_PATH}/include)
@@ -19,7 +19,8 @@ link_directories(${ELA_LIB_PATH}/lib)
 include_directories(${C_SERIAL_PORT_LIB_PATH}/include)
 link_directories(${C_SERIAL_PORT_LIB_PATH}/lib)
 
-include_directories("C:\\Project\\Cpp\\maddy\\include\\maddy")
+include_directories(${CMAKE_SOURCE_DIR}/inc)
+include_directories(.)
 
 find_package(Qt6 COMPONENTS
         Core
