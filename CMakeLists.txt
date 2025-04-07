@@ -19,8 +19,9 @@ link_directories(${ELA_LIB_PATH}/lib)
 include_directories(${C_SERIAL_PORT_LIB_PATH}/include)
 link_directories(${C_SERIAL_PORT_LIB_PATH}/lib)
 
-include_directories(${CMAKE_SOURCE_DIR}/inc)
+include_directories(${CMAKE_SOURCE_DIR}/src/inc)
 include_directories(.)
+include_directories(src)
 
 find_package(Qt6 COMPONENTS
         Core
@@ -29,50 +30,62 @@ find_package(Qt6 COMPONENTS
         LinguistTools
         REQUIRED)
 
-add_executable(serialPortTools main.cpp
-        serialwindow.cpp
-        serialwindow.h
-        serialwindow.ui
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
-        inputdialog.cpp
-        inputdialog.h
-        inputdialog.ui
-        settingswindow.cpp
-        settingswindow.h
-        settingswindow.ui
-        outTextEdit.cpp
-        outTextEdit.h
-        threadPool.h
-        concurrentqueue.h
+add_executable(serialPortTools src/main.cpp
+        src/serialwindow.cpp
+        src/serialwindow.h
+        src/serialwindow.ui
+        src/mainwindow.cpp
+        src/mainwindow.h
+        src/mainwindow.ui
+        src/inputdialog.cpp
+        src/inputdialog.h
+        src/inputdialog.ui
+        src/settingswindow.cpp
+        src/settingswindow.h
+        src/settingswindow.ui
+        src/outTextEdit.cpp
+        src/outTextEdit.h
+        src/threadPool.h
+        src/concurrentqueue.h
 
-        cmdwidget.cpp
-        cmdwidget.h
-        cmdwidget.ui
-        cmdlineedit.cpp
-        cmdlineedit.h
-        cmdlineedit.ui
+        src/cmdwidget.cpp
+        src/cmdwidget.h
+        src/cmdwidget.ui
+        src/cmdlineedit.cpp
+        src/cmdlineedit.h
+        src/cmdlineedit.ui
 
         resources.qrc
 )
 
 # 添加资源文件
-qt6_add_resources(serialPortTools "translations"
+qt6_add_resources(serialPortTools "res/translations"
         PREFIX "/"
         FILES
         resources.qrc
 )
 
-target_link_libraries(serialPortTools
-        Qt::Core
-        Qt::Gui
-        Qt::Widgets
-
-        ElaWidgetToolsd.lib
-
-        libcserialport.lib
-)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message(STATUS "当前是Debug构建")
+    # 添加Debug特有的设置
+    target_link_libraries(serialPortTools
+            Qt::Core
+            Qt::Gui
+            Qt::Widgets
+            ElaWidgetToolsd.lib
+            libcserialportd.lib
+    )
+elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
+    message(STATUS "当前是Release构建")
+    # 添加Release特有的设置
+    target_link_libraries(serialPortTools
+            Qt::Core
+            Qt::Gui
+            Qt::Widgets
+            ElaWidgetTools.lib
+            libcserialport.lib
+    )
+endif ()
 
 if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     set(DEBUG_SUFFIX)

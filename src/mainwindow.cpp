@@ -49,11 +49,11 @@ mainWindow::mainWindow(QWidget *parent) : ElaWidget(parent), ui(new Ui::mainWind
     QString systemLang = QLocale::system().name(); // 例如: "zh_CN", "en_US"
     // 尝试加载对应的.qm文件
     translator_ = new QTranslator{this};
-    if (translator_->load(":/translations/" + systemLang + ".qm")) {
+    if (translator_->load(":/res/translations/" + systemLang + ".qm")) {
         QCoreApplication::installTranslator(translator_);
     } else {
         // 加载失败，使用默认语言(如英语)
-        if (translator_->load(":/translations/en_US.qm")) {
+        if (translator_->load(":/res/translations/en_US.qm")) {
             QCoreApplication::installTranslator(translator_);
         }
     }
@@ -71,6 +71,8 @@ mainWindow::mainWindow(QWidget *parent) : ElaWidget(parent), ui(new Ui::mainWind
 
     ui->tabWidget->setObjectName("ElaTabWidget");
     setObjectName("ElaWidget");
+
+    setWindowIcon(QIcon{":/res/plug.png"});
 
     eTheme->setThemeMode(
         true == isSystemDarkTheme() ? ElaThemeType::Dark : ElaThemeType::Light
@@ -148,11 +150,11 @@ void mainWindow::initButton() {
             QCoreApplication::removeTranslator(translator_);
 
             // 加载新的语言文件
-            if (translator_->load(":/translations/" + language + ".qm")) {
+            if (translator_->load(":/res/translations/" + language + ".qm")) {
                 QCoreApplication::installTranslator(translator_);
             } else {
                 // 加载失败，回退到英语
-                if (translator_->load(":/translations/en_US.qm")) {
+                if (translator_->load(":/res/translations/en_US.qm")) {
                     QCoreApplication::installTranslator(translator_);
                 }
             }

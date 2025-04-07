@@ -6,8 +6,8 @@
 
 ## 程序截图
 
-![img.png](doc/light.png)
-![img.png](doc/dark.png)
+![img.png](../doc/light.png)
+![img.png](../doc/dark.png)
 > 目前完美支持浅色模式和深色模式
 
 ## 支持平台
@@ -35,7 +35,7 @@
 > - [ElaWidgetTools](https://github.com/Liniyous/ElaWidgetTools)
 > - [CSerialPort](https://github.com/itas109/CSerialPort)
 
-> 请把[CMakeLists.txt](CMakeLists.txt)的下述变量 修改自己电脑的第三方库安装路径 
+> 请把[CMakeLists.txt](../CMakeLists.txt)的下述变量 修改自己电脑的第三方库安装路径 
 > - CMAKE_PREFIX_PATH 
 > - ELA_LIB_PATH
 > - C_SERIAL_PORT_LIB_PATH
@@ -59,5 +59,5 @@ lupdate -recursive . -ts translations/zh_CN.ts translations/en_US.ts
 lrelease translations/zh_CN.ts translations/en_US.ts
 ```
 
-然后在 [resources.qrc](resources.qrc) 添加 qm文件路径
+然后在 [resources.qrc](../resources.qrc) 添加 qm文件路径
 
