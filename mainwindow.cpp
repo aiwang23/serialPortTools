@@ -20,6 +20,7 @@
 #include <QSettings>
 
 #include "settingswindow.h"
+#include <QTranslator>
 
 static bool isSystemDarkTheme() {
     // 1. 先检查调色板（通用方法）
@@ -43,6 +44,19 @@ static bool isSystemDarkTheme() {
 }
 
 mainWindow::mainWindow(QWidget *parent) : ElaWidget(parent), ui(new Ui::mainWindow) {
+    // 获取系统语言
+    QString systemLang = QLocale::system().name(); // 例如: "zh_CN", "en_US"
+    // 尝试加载对应的.qm文件
+    translator_ = new QTranslator{this};
+    if (translator_->load(":/translations/" + systemLang + ".qm")) {
+        QCoreApplication::installTranslator(translator_);
+    } else {
+        // 加载失败，使用默认语言(如英语)
+        if (translator_->load(":/translations/en_US.qm")) {
+            QCoreApplication::installTranslator(translator_);
+        }
+    }
+
     ui->setupUi(this);
 
     setWindowTitle("serialPortTools");
@@ -69,7 +83,7 @@ mainWindow::mainWindow(QWidget *parent) : ElaWidget(parent), ui(new Ui::mainWind
     );
 
     // 开场白
-    ElaMessageBar::information(ElaMessageBarType::TopLeft, "hello", "welcome", 2000, this);
+    ElaMessageBar::information(ElaMessageBarType::TopLeft, tr("hello"), tr("welcome"), 2000, this);
 
     // 连接signals slots
     initSignalSlots();
@@ -98,13 +112,35 @@ void mainWindow::initSignalSlots() {
     // add settings window
     connect(more_icon_button_, &QPushButton::clicked, this, [&]() {
         ElaMenu menu;
-        auto serial_action = menu.addElaIconAction(ElaIconType::Plug, "serial");
+        auto serial_action = menu.addElaIconAction(ElaIconType::Plug, tr("serial"));
         auto settings_action = menu.addElaIconAction(ElaIconType::Gear, tr("setting"));
         connect(serial_action, &QAction::triggered, this, &mainWindow::newSerialWindow);
         connect(settings_action, &QAction::triggered, this, [&]() {
             settingsWindow *w = new settingsWindow;
             int idx = ui->tabWidget->addTab(w, tr("setting"));
             ui->tabWidget->setCurrentIndex(idx);
+
+            connect(w, &settingsWindow::sigLanguageChanged, this, [this](QString language) {
+                // 移除旧的翻译器
+                QCoreApplication::removeTranslator(translator_);
+
+                // 加载新的语言文件
+                if (translator_->load(":/translations/" + language + ".qm")) {
+                    QCoreApplication::installTranslator(translator_);
+                } else {
+                    // 加载失败，回退到英语
+                    if (translator_->load(":/translations/en_US.qm")) {
+                        QCoreApplication::installTranslator(translator_);
+                    }
+                }
+
+                // 通知所有窗口重新翻译UI
+                QCoreApplication::postEvent(QCoreApplication::instance(),
+                                            new QEvent(QEvent::LanguageChange));
+                for (QWidget *widget: QApplication::allWidgets()) {
+                    widget->update();
+                }
+            });
         });
 
         menu.exec(QCursor::pos());
@@ -143,8 +179,25 @@ void mainWindow::resizeEvent(QResizeEvent *event) {
     }
 }
 
+
+void mainWindow::changeEvent(QEvent *event) {
+    if (event) {
+        switch (event->type()) {
+            // this event is send if a translator is loaded
+            case QEvent::LanguageChange:
+                ui->retranslateUi(this);
+                break;
+            default:
+                break;
+        }
+    }
+
+    ElaWidget::changeEvent(event);
+}
+
+
 void mainWindow::newSerialWindow() {
-    inputDialog dialog{QString("new window name")};
+    inputDialog dialog{QString(tr("new serial window"))};
 
     dialog.exec();
     QString text = dialog.getInputText();
@@ -154,6 +207,6 @@ void mainWindow::newSerialWindow() {
         ui->tabWidget->setCurrentIndex(idx);
 
         // 开场白
-        ElaMessageBar::information(ElaMessageBarType::TopLeft, "info", "new window succeed", 2000, this);
+        ElaMessageBar::information(ElaMessageBarType::TopLeft, tr("info"), tr("new window succeed"), 2000, this);
     }
 }

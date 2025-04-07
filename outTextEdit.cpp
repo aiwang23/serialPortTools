@@ -21,18 +21,18 @@ void outTextEdit::contextMenuEvent(QContextMenuEvent *event) {
     menu->setAttribute(Qt::WA_DeleteOnClose);
     QAction *action = nullptr;
 
-    action = menu->addElaIconAction(ElaIconType::Copy, "复制", QKeySequence::Copy);
+    action = menu->addElaIconAction(ElaIconType::Copy, tr("copy"), QKeySequence::Copy);
     action->setEnabled(!textCursor().selectedText().isEmpty());
     connect(action, &QAction::triggered, this, &ElaPlainTextEdit::copy);
 
     menu->addSeparator();
-    action = menu->addAction("全选");
+    action = menu->addAction(tr("select all"));
     action->setShortcut(QKeySequence::SelectAll);
     action->setEnabled(!toPlainText().isEmpty() && !(textCursor().selectedText() == toPlainText()));
     connect(action, &QAction::triggered, this, &ElaPlainTextEdit::selectAll);
 
     menu->addSeparator();
-    action = menu->addAction("清空");
+    action = menu->addAction(tr("clear"));
     action->setShortcut(QKeySequence::Delete);
     connect(action, &QAction::triggered, this, &QPlainTextEdit::clear);
 

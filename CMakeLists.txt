@@ -25,6 +25,7 @@ find_package(Qt6 COMPONENTS
         Core
         Gui
         Widgets
+        LinguistTools
         REQUIRED)
 
 add_executable(serialPortTools main.cpp
@@ -52,6 +53,14 @@ add_executable(serialPortTools main.cpp
         cmdlineedit.h
         cmdlineedit.ui
 
+        resources.qrc
+)
+
+# 添加资源文件
+qt6_add_resources(serialPortTools "translations"
+        PREFIX "/"
+        FILES
+        resources.qrc
 )
 
 target_link_libraries(serialPortTools

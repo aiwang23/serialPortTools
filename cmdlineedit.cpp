@@ -25,7 +25,7 @@ cmdLineEdit::~cmdLineEdit() {
 
 void cmdLineEdit::initSignalSlots() {
     connect(iconBtn_send_, &ElaIconButton::clicked, this, [this]() {
-        emit sigCmdSend(ui->lineEdit->text());
+        emit sigCmdSend(ui->lineEdit->text().toUtf8());
     });
 
     connect(ui->lineEdit, &ElaLineEdit::textEdited, this, [this]() {
@@ -33,7 +33,7 @@ void cmdLineEdit::initSignalSlots() {
     });
 
     connect(ui->lineEdit, &ElaLineEdit::returnPressed, this, [this]() {
-        emit sigCmdSend(ui->lineEdit->text());
+        emit sigCmdSend(ui->lineEdit->text().toUtf8());
     });
 }
 
@@ -43,4 +43,19 @@ int cmdLineEdit::findIndex(const std::vector<cmdLineEdit *> &vec, const cmdLineE
         return std::distance(vec.begin(), it); // 返回迭代器距离（即下标）
     }
     return -1;
+}
+
+void cmdLineEdit::changeEvent(QEvent *event) {
+    if (event) {
+        switch (event->type()) {
+            // this event is send if a translator is loaded
+            case QEvent::LanguageChange:
+                ui->retranslateUi(this);
+                break;
+            default:
+                break;
+        }
+    }
+
+    QWidget::changeEvent(event);
 }

@@ -30,6 +30,21 @@ void cmdWidget::initSignalSlots() {
     connect(ui->edit_first, &cmdLineEdit::sigStatusChanged, this, &cmdWidget::addOrRemoveLine);
 }
 
+void cmdWidget::changeEvent(QEvent *event) {
+    if (event) {
+        switch (event->type()) {
+            // this event is send if a translator is loaded
+            case QEvent::LanguageChange:
+                ui->retranslateUi(this);
+            break;
+            default:
+                break;
+        }
+    }
+
+    QWidget::changeEvent(event);
+}
+
 void cmdWidget::addOrRemoveLine(cmdLineEdit *edit) {
     int idx = cmdLineEdit::findIndex(editVec_, edit);
     int size = editVec_.size();

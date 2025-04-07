@@ -27,8 +27,11 @@ public:
 
     void initSignalSlots();
 
+protected:
+    void changeEvent(QEvent *event) override;
+
 Q_SIGNALS:
-    Q_SIGNAL void sigCmdSend(QString cmd);
+    Q_SIGNAL void sigCmdSend(QByteArray cmd);
 
 private Q_SLOTS:
     Q_SLOT void addOrRemoveLine(cmdLineEdit *edit);

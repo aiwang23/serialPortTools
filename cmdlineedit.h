@@ -32,8 +32,11 @@ public:
 
     static int findIndex(const std::vector<cmdLineEdit *> &vec, const cmdLineEdit *target);
 
+protected:
+    void changeEvent(QEvent *event) override;
+
 Q_SIGNALS:
-    Q_SIGNAL void sigCmdSend(QString cmd);
+    Q_SIGNAL void sigCmdSend(QByteArray cmd);
 
     Q_SIGNAL void sigStatusChanged(cmdLineEdit *edit);
 

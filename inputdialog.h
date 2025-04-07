@@ -33,6 +33,8 @@ public:
 protected:
     void showEvent(QShowEvent *event) override;
 
+    void changeEvent(QEvent *event) override;
+
 Q_SIGNALS:
     Q_SIGNAL void finished();
 

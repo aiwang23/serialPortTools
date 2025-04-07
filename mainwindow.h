@@ -6,9 +6,11 @@
 #define TABWINDOW_H
 
 #include <ElaWidget.h>
+#include <qcoreevent.h>
 #include <QWidget>
 
 
+class QTranslator;
 class ElaIconButton;
 QT_BEGIN_NAMESPACE
 
@@ -31,8 +33,11 @@ public:
 protected:
     void resizeEvent(QResizeEvent *event) override;
 
+    void changeEvent(QEvent *event) override;
+
 Q_SIGNALS:
     Q_SIGNAL void hideSecondaryWindow();
+
     Q_SIGNAL void showSecondaryWindow();
 
 public Q_SLOTS:
@@ -42,6 +47,7 @@ private:
     Ui::mainWindow *ui;
     ElaIconButton *new_icon_button_;
     ElaIconButton *more_icon_button_;
+    QTranslator *translator_;
 };
 
 

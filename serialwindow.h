@@ -61,6 +61,9 @@ public:
 
     ~serialWindow() override;
 
+protected:
+    void changeEvent(QEvent *event) override;
+
 private:
     void initComboBox();
 
@@ -77,21 +80,21 @@ Q_SIGNALS:
     Q_SIGNAL void sigAddSerialPort(QString item);
 
     // 从串口读取的数据
-    Q_SIGNAL void sigSerialPortData(QString data);
+    Q_SIGNAL void sigSerialPortData(QByteArray data);
 
     // 从串口读取后 并经过处理后 的数据
-    Q_SIGNAL void sigDataCompleted(QString data);
+    Q_SIGNAL void sigDataCompleted(QByteArray data);
 
-    Q_SIGNAL void sigSendData(QString data);
+    Q_SIGNAL void sigSendData(QByteArray data);
 
 private Q_SLOTS:
     Q_SLOT void refreshSerialPort();
 
     // 收到数据后 进行处理 处理完后 直接显示
-    Q_SLOT void convertDataAndSend(const QString &data);
+    Q_SLOT void convertDataAndSend(const QByteArray &data);
 
     // 发送数据到串口
-    Q_SLOT void sendDataToSerial(QString data);
+    Q_SLOT void sendDataToSerial(const QByteArray &data);
 
 public Q_SLOT:
     Q_SLOT void hideSecondaryWindow();
@@ -112,12 +115,13 @@ private:
 
     ThreadPool threadPool_;
     std::atomic_bool isStop_ = false;
-    moodycamel::ConcurrentQueue<QString> data_queue_;
+    moodycamel::ConcurrentQueue<QByteArray> data_queue_;
 
     // 数据窗口比例 MAN模式 CMD模式
     std::unordered_map<sendMode, QList<int> > dataWidgetRatio_;
     float animationProgress = 0;
     QTimer *animationTimer;
+    QTimer *autoSendTimer_;
 };
 
 

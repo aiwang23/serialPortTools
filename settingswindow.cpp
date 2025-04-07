@@ -29,8 +29,39 @@ settingsWindow::settingsWindow(QWidget *parent) : QWidget(parent), ui(new Ui::se
     ui->plainTextEdit->setReadOnly(true);
     ui->plainTextEdit->setObjectName("ElaPlainTextEdit");
     ui->scrollArea->setObjectName("ElaScrollArea");
+    ui->label_language->setObjectName("ElaText");
+
+    initComboBox();
+    initSignalSlots();
 }
 
 settingsWindow::~settingsWindow() {
     delete ui;
+}
+
+void settingsWindow::initComboBox() {
+    ui->comboBox_language->addItems(
+        {"zh_CN", "en_US"}
+    );
+}
+
+void settingsWindow::initSignalSlots() {
+    connect(ui->comboBox_language, &ElaComboBox::currentTextChanged, this,[this]() {
+        QString text = ui->comboBox_language->currentText();
+        emit sigLanguageChanged(text);
+    });
+}
+
+void settingsWindow::changeEvent(QEvent *event) {
+    if (event) {
+        switch (event->type()) {
+            // this event is send if a translator is loaded
+            case QEvent::LanguageChange:
+                ui->retranslateUi(this);
+            break;
+            default:
+                break;
+        }
+    }
+    QWidget::changeEvent(event);
 }

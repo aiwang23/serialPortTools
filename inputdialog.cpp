@@ -44,7 +44,23 @@ void inputDialog::exec() {
 void inputDialog::showEvent(QShowEvent *event) {
     ElaWidget::showEvent(event);
 
+    ui->lineEdit->setFocus();
     // 手动发送一个 FocusIn event, 播放动画
     QFocusEvent focusEvent(QEvent::FocusIn, Qt::MouseFocusReason);
     QCoreApplication::sendEvent(ui->lineEdit, &focusEvent);
+}
+
+void inputDialog::changeEvent(QEvent *event) {
+    if (event) {
+        switch (event->type()) {
+            // this event is send if a translator is loaded
+            case QEvent::LanguageChange:
+                ui->retranslateUi(this);
+            break;
+            default:
+                break;
+        }
+    }
+
+    ElaWidget::changeEvent(event);
 }
