@@ -46,14 +46,16 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     Q_SLOT void newSerialWindow();
+    Q_SLOT void newSerialSerVer();
 
 private:
     Ui::mainWindow *ui;
-    ElaIconButton *new_icon_button_;
+    ElaIconButton *new_serial_button_;
     ElaToolButton *more_tools_button_;
     ElaMenu *more_menu_;
     QAction *serial_action_;
     QAction *settings_action_;
+    QAction * serialServer_action_;
     QTranslator *translator_;
 };
 

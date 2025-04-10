@@ -23,6 +23,8 @@
 #include <QTranslator>
 #include <ElaToolButton.h>
 
+#include "serialserver.h"
+
 static bool isSystemDarkTheme() {
     // 1. 先检查调色板（通用方法）
     bool isDark = QGuiApplication::palette().color(QPalette::Window).lightness() < 128;
@@ -104,7 +106,7 @@ void mainWindow::initSignalSlots() {
     });
 
     // 添加 serial window
-    connect(new_icon_button_, &QPushButton::clicked, this, &mainWindow::newSerialWindow);
+    connect(new_serial_button_, &QPushButton::clicked, this, &mainWindow::newSerialWindow);
 
     // 剩余最后一个小窗格之后, 点击关闭，直接退出
     connect(ui->tabWidget, &ElaTabWidget::tabCloseRequested, this, [&]() {
@@ -113,11 +115,6 @@ void mainWindow::initSignalSlots() {
     });
 
     // 父组件 传子组件
-    // serialWindow *w = findChild<serialWindow *>();
-    // if (w) {
-    //     connect(this, &mainWindow::hideSecondaryWindow, w, &serialWindow::hideSecondaryWindow);
-    //     connect(this, &mainWindow::showSecondaryWindow, w, &serialWindow::showSecondaryWindow);
-    // }
     QList<serialWindow *> w_list = findChildren<serialWindow *>();
     for (auto w: w_list) {
         connect(this, &mainWindow::hideSecondaryWindow, w, &serialWindow::hideSecondaryWindow);
@@ -128,9 +125,9 @@ void mainWindow::initSignalSlots() {
 void mainWindow::initButton() {
     QWidget *widget = new QWidget;
     QHBoxLayout *hbox = new QHBoxLayout(widget);
-    new_icon_button_ = new ElaIconButton{ElaIconType::PlusLarge, 15, 30, 30};
+    new_serial_button_ = new ElaIconButton{ElaIconType::PlusLarge, 15, 30, 30};
     more_tools_button_ = new ElaToolButton;
-    hbox->addWidget(new_icon_button_);
+    hbox->addWidget(new_serial_button_);
     hbox->addWidget(more_tools_button_);
     ui->tabWidget->setCornerWidget(widget);
 
@@ -138,8 +135,10 @@ void mainWindow::initButton() {
 
     more_menu_ = new ElaMenu;
     serial_action_ = more_menu_->addElaIconAction(ElaIconType::Plug, tr("serial"));
+    serialServer_action_ = more_menu_->addElaIconAction(ElaIconType::Server, tr("server"));
     settings_action_ = more_menu_->addElaIconAction(ElaIconType::Gear, tr("setting"));
     connect(serial_action_, &QAction::triggered, this, &mainWindow::newSerialWindow);
+    connect(serialServer_action_, &QAction::triggered, this, &mainWindow::newSerialSerVer);
     connect(settings_action_, &QAction::triggered, this, [&]() {
         settingsWindow *w = new settingsWindow;
         int idx = ui->tabWidget->addTab(w, tr("setting"));
@@ -215,6 +214,21 @@ void mainWindow::newSerialWindow() {
     QString text = dialog.getInputText();
     if (not text.isEmpty()) {
         auto *w = new serialWindow;
+        int idx = ui->tabWidget->addTab(w, text);
+        ui->tabWidget->setCurrentIndex(idx);
+
+        // 开场白
+        ElaMessageBar::information(ElaMessageBarType::TopLeft, tr("info"), tr("new window succeed"), 2000, this);
+    }
+}
+
+void mainWindow::newSerialSerVer() {
+    inputDialog dialog{QString(tr("new serial server"))};
+
+    dialog.exec();
+    QString text = dialog.getInputText();
+    if (not text.isEmpty()) {
+        auto *w = new serialServer;
         int idx = ui->tabWidget->addTab(w, text);
         ui->tabWidget->setCurrentIndex(idx);
 

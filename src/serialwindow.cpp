@@ -23,6 +23,10 @@
 #include <utility>
 #include "threadPool.h"
 #include <QPropertyAnimation>
+#include <QTcpSocket>
+
+#include "serialserver.h"
+#include "nlohmann/json.hpp"
 
 using itas109::CSerialPortInfo;
 using itas109::SerialPortInfo;
@@ -45,14 +49,27 @@ static itas109::Parity SerialParityFrom(const QString &chars) {
     }
 }
 
+static std::string toString(const itas109::Parity parity) {
+    if (itas109::ParityNone == parity) return "none";
+    else if (itas109::ParityOdd == parity) return "odd";
+    else if (itas109::ParityEven == parity) return "even";
+    else return "none";
+}
+
 // {"1", "1.5", "2"}
 static itas109::StopBits SerialStopBitsFrom(const QString &chars) {
-    if (chars == "1")
-        return itas109::StopOne;
-    else if (chars == "1.5")
+    if (chars == "1.5")
         return itas109::StopOneAndHalf;
     else if (chars == "2")
         return itas109::StopTwo;
+    else
+        return itas109::StopOne;
+}
+
+static std::string toString(itas109::StopBits stop_bits) {
+    if (itas109::StopOneAndHalf) return "1.5";
+    else if (itas109::StopTwo) return "2";
+    else return "1";
 }
 
 // text 是否为 html
@@ -122,7 +139,8 @@ int convertToHex(QString str, QByteArray &hex) {
 serialWindow::serialWindow(QWidget *parent)
     : QWidget(parent),
       ui(new Ui::serialWindow),
-      threadPool_(1) {
+      threadPool_(1),
+      tcp_socket_(new QTcpSocket(this)) {
     ui->setupUi(this);
 
     threadPool_.enqueue([this]() {
@@ -149,6 +167,12 @@ serialWindow::serialWindow(QWidget *parent)
     // 刷新串口按钮 在 ui->comboBox_port 右侧
     iconBtn_refresh_ = new ElaIconButton{ElaIconType::ArrowRotateLeft, 17, 20, 20};
     ui->horizontalLayout_0->addWidget(iconBtn_refresh_);
+
+    // 刷新URL按钮 在 serialWindow 顶部
+    iconBtn_url_refresh_ = new ElaIconButton{ElaIconType::ArrowRotateLeft, 17, 25, 25};
+    ui->horizontalLayout_top->insertWidget(0, iconBtn_url_refresh_);
+    ui->lineEdit_url->setEnabled(false);
+    iconBtn_url_refresh_->setEnabled(false);
 
     // 默认 MAN 手动模式
     ui->cmdwidget->hide();
@@ -197,6 +221,9 @@ serialWindow::serialWindow(QWidget *parent)
 }
 
 serialWindow::~serialWindow() {
+    if (tcp_socket_) {
+        tcp_socket_->disconnectFromHost();
+    }
     isStop_ = true;
     serial_port_.close();
     delete ui;
@@ -208,7 +235,7 @@ void serialWindow::changeEvent(QEvent *event) {
             // this event is send if a translator is loaded
             case QEvent::LanguageChange:
                 ui->retranslateUi(this);
-            break;
+                break;
             default:
                 break;
         }
@@ -259,51 +286,7 @@ void serialWindow::initComboBox() {
 
 void serialWindow::initSignalSlots() {
     // 打开/关闭串口
-    connect(ui->toggleswitch_open, &ElaToggleButton::toggled, this, [this](bool checked) {
-        if (checked) {
-            // 打开
-            if (ui->comboBox_port->count()) {
-                // 有可用serial
-                // 填入args
-                std::string device_name = ui->comboBox_port->currentText().toStdString();
-                int baudrate = ui->comboBox_baud->currentText().toInt();
-                itas109::DataBits data_bits = SerialDataBitsFrom(ui->comboBox_databit->currentText());
-                itas109::Parity parity = SerialParityFrom(ui->comboBox_parity->currentText());
-                itas109::StopBits stop_bits = SerialStopBitsFrom(ui->comboBox_stopbit->currentText());
-                serial_port_.init(
-                    device_name.c_str(), baudrate, parity, data_bits, stop_bits
-                );
-                serial_port_.setReadIntervalTimeout(0);
-
-                // 打开 serial
-                if (not serial_port_.open()) {
-                    ElaMessageBar::error(
-                        ElaMessageBarType::TopLeft, tr("error"),
-                        QString{"%0 %1"}.arg(serial_port_.getLastError()).arg(
-                            serial_port_.getLastErrorMsg()), 3000, this
-                    );
-                    ui->toggleswitch_open->setText(tr("open"));
-                    ui->toggleswitch_open->setIsToggled(false);
-                    return;
-                }
-                // 更新 渲染类型
-                std::string type = ui->comboBox_show_type->currentText().toStdString();
-                show_type_ = dataTypeFrom(type);
-                ui->toggleswitch_open->setText(tr("close"));
-            } else {
-                // 没有可用 serials
-                ElaMessageBar::error(ElaMessageBarType::TopLeft, tr("error"), tr("This Computer no avaiable port"),
-                                     3000,
-                                     this);
-
-                ui->toggleswitch_open->setIsToggled(false);
-            }
-        } else {
-            // 关闭
-            serial_port_.close();
-            ui->toggleswitch_open->setText(tr("open"));
-        }
-    });
+    connect(ui->toggleswitch_open, &ElaToggleButton::toggled, this, &serialWindow::openOrCloseSerialPort);
 
     // 发送串口
     connect(ui->pushButton_send, &QPushButton::clicked, this, [&]() {
@@ -499,6 +482,49 @@ void serialWindow::initSignalSlots() {
         autoSendTimer_->stop();
         autoSendTimer_->start(static_cast<int>(sec * 1000));
     });
+
+    // 启用远程调试
+    connect(ui->toggleswitch_url, &ElaToggleSwitch::toggled, this, [this](bool check) {
+        if (check) {
+            // 打开远程调试
+            isRemote = true;
+            ui->lineEdit_url->setEnabled(true);
+            iconBtn_url_refresh_->setEnabled(true);
+        } else {
+            // 关闭远程调试
+            isRemote = false;
+            if (tcp_socket_->state() == QAbstractSocket::ConnectedState) {
+                tcp_socket_->disconnectFromHost();
+            }
+            ui->lineEdit_url->setEnabled(false);
+            iconBtn_url_refresh_->setEnabled(false);
+        }
+    });
+
+    // 回车 发起远程调试
+    connect(ui->lineEdit_url, &ElaLineEdit::returnPressed, this, &serialWindow::connectToHost);
+
+    // 刷新 远程连接
+    connect(iconBtn_url_refresh_, &ElaIconButton::clicked, this, &serialWindow::connectToHost);
+
+    // tcp 连接到了
+    connect(tcp_socket_, &QTcpSocket::connected, this, [this]() {
+    });
+
+    // tcp 断开连接
+    connect(tcp_socket_, &QTcpSocket::disconnected, this, [this]() {
+    });
+
+    // tcp error
+    connect(tcp_socket_, &QTcpSocket::errorOccurred, this, [this](QTcpSocket::SocketError error) {
+        Q_UNUSED(error)
+        ElaMessageBar::error(ElaMessageBarType::TopLeft,
+                             tr("error"), tr(tcp_socket_->errorString().toUtf8()), 3000,
+                             this);
+    });
+
+    // tcp 接受数据
+    connect(tcp_socket_, &QTcpSocket::readyRead, this, &serialWindow::readTcpData);
 }
 
 void serialWindow::initText() {
@@ -511,8 +537,21 @@ void serialWindow::initText() {
     ui->label_send_type->setTextPixelSize(13);
     ui->label_send_mode->setTextPixelSize(13);
     ui->label_auto_mode_cycle->setTextPixelSize(13);
+    ui->label_url->setTextPixelSize(13);
 }
 
+int64_t serialWindow::writeSerialSettings(const serialSettings &settings) {
+    nlohmann::json json;
+    json["type"] = "serialSettings";
+    json["data"]["port"] = settings.port;
+    json["data"]["baud"] = settings.baud;
+    json["data"]["dataBits"] = settings.dataBits;
+    json["data"]["parity"] = settings.parity;
+    json["data"]["stopBit"] = settings.stopBit;
+
+    QByteArray text = QByteArray::fromStdString(json.dump());
+    return tcp_socket_->write(text);
+}
 
 void serialWindow::onReadEvent(const char *portName, unsigned int readBufferLen) {
     if (readBufferLen > 0) {
@@ -526,6 +565,67 @@ void serialWindow::onReadEvent(const char *portName, unsigned int readBufferLen)
         }
     }
 }
+
+void serialWindow::openOrCloseSerialPort(bool checked) {
+    if (checked) {
+        // 打开
+        if (ui->comboBox_port->count()) {
+            // 有可用serial
+            // 填入args
+            std::string device_name = ui->comboBox_port->currentText().toStdString();
+            int baudrate = ui->comboBox_baud->currentText().toInt();
+            itas109::DataBits data_bits = SerialDataBitsFrom(ui->comboBox_databit->currentText());
+            itas109::Parity parity = SerialParityFrom(ui->comboBox_parity->currentText());
+            itas109::StopBits stop_bits = SerialStopBitsFrom(ui->comboBox_stopbit->currentText());
+
+            if (isRemote) {
+                // 远程打开
+                serialSettings settings{
+                    device_name,
+                    std::to_string(baudrate),
+                    std::to_string(data_bits),
+                    toString(parity),
+                    toString(stop_bits)
+                };
+                int len = writeSerialSettings(settings);
+            } else {
+                // 本地打开
+                serial_port_.init(
+                    device_name.c_str(), baudrate, parity, data_bits, stop_bits
+                );
+                serial_port_.setReadIntervalTimeout(0);
+                // 打开 serial
+                if (not serial_port_.open()) {
+                    ElaMessageBar::error(
+                        ElaMessageBarType::TopLeft, tr("error"),
+                        QString{"%0 %1"}.arg(serial_port_.getLastError()).arg(
+                            serial_port_.getLastErrorMsg()), 3000, this
+                    );
+                    ui->toggleswitch_open->setText(tr("open"));
+                    ui->toggleswitch_open->setIsToggled(false);
+                    return;
+                }
+            }
+
+            // 更新 渲染类型
+            std::string type = ui->comboBox_show_type->currentText().toStdString();
+            show_type_ = dataTypeFrom(type);
+            ui->toggleswitch_open->setText(tr("close"));
+        } else {
+            // 没有可用 serials
+            ElaMessageBar::error(ElaMessageBarType::TopLeft, tr("error"), tr("This Computer no avaiable port"),
+                                 3000,
+                                 this);
+
+            ui->toggleswitch_open->setIsToggled(false);
+        }
+    } else {
+        // 关闭
+        serial_port_.close();
+        ui->toggleswitch_open->setText(tr("open"));
+    }
+}
+
 
 void serialWindow::refreshSerialPort() {
     // 获取可用串口list
@@ -591,7 +691,8 @@ void serialWindow::convertDataAndSend(const QByteArray &data) {
 }
 
 void serialWindow::sendDataToSerial(const QByteArray &data) {
-    if (!serial_port_.isOpen()) {
+    // 本地串口 和 远程连接 都没打开
+    if (not serial_port_.isOpen() and tcp_socket_->state() == QAbstractSocket::UnconnectedState) {
         ElaMessageBar::error(ElaMessageBarType::TopLeft, tr("Error"), tr("Please open serial port first"), 3000, this);
         return;
     }
@@ -608,8 +709,68 @@ void serialWindow::sendDataToSerial(const QByteArray &data) {
         sendData = data;
     }
 
-    // 发送二进制数据
-    serial_port_.writeData(sendData.constData(), sendData.size());
+    if (isRemote) {
+        nlohmann::json json;
+        json["type"] = "serialData";
+        json["data"] = sendData.toStdString();
+        tcp_socket_->write(QByteArray::fromStdString(json.dump()));
+    } else {
+        // 发送二进制数据
+        serial_port_.writeData(sendData.constData(), sendData.size());
+    }
+}
+
+void serialWindow::connectToHost() {
+    if (tcp_socket_->state() == QAbstractSocket::ConnectedState) {
+        tcp_socket_->disconnectFromHost();
+        return;
+    }
+    QString addressPort = ui->lineEdit_url->text().trimmed();
+    QStringList parts = addressPort.split(":");
+    if (parts.size() != 2) {
+        ElaMessageBar::error(ElaMessageBarType::TopLeft, tr("error"),
+                             tr("Please enter the correct IP: port format"), 3000, this);
+        return;
+    }
+
+    bool ok;
+    quint16 port = parts[1].toUShort(&ok);
+    if (!ok) {
+        ElaMessageBar::warning(ElaMessageBarType::TopLeft, tr("error"),
+                               tr("Invalid port"), 3000, this);
+        return;
+    }
+    tcp_socket_->connectToHost(parts[0], port);
+}
+
+void serialWindow::readTcpData() {
+    QByteArray data = tcp_socket_->readAll();
+
+    nlohmann::json json;
+    try {
+        json = nlohmann::json::parse(data.toStdString());
+    } catch (const nlohmann::json::parse_error &e) {
+        // show binary
+        data_queue_.enqueue(data);
+        return;
+    }
+
+    std::string type = json.at("type").get<std::string>();
+    if ("serialList" == type) {
+        // 可用串口列表
+        auto list = json.at("data").get<std::vector<std::string> >();
+        if (list.empty()) {
+            return;
+        }
+        ui->comboBox_port->clear();
+        for (const std::string &port: list) {
+            ui->comboBox_port->addItem(QString::fromStdString(port));
+        }
+    } else if ("serialData" == type) {
+        // 接收 串口的文本数据
+        std::string showData = json.at("data").get<std::string>();
+        data_queue_.enqueue(std::move(QByteArray::fromStdString(showData)));
+    }
 }
 
 void serialWindow::hideSecondaryWindow() {

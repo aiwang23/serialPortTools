@@ -12,6 +12,11 @@
 #include "threadPool.h"
 #include "concurrentqueue.h"
 
+struct serialSettings;
+class QTcpSocket;
+class QCompleter;
+class QStringListModel;
+class ElaLineEdit;
 class ElaIconButton;
 class ElaToggleButton;
 
@@ -71,23 +76,24 @@ private:
 
     void initText();
 
-    // 接受serial data回调
-    Q_SLOT void onReadEvent(const char *portName, unsigned int readBufferLen) override;
+    // 发送 serial Settings 到server ,请求打开 serial
+    int64_t writeSerialSettings(const serialSettings& settings);
 
 Q_SIGNALS:
+    // 清空 comboBox_port items
     Q_SIGNAL void sigClearComboBoxPort();
 
+    // 添加 comboBox_port items
     Q_SIGNAL void sigAddSerialPort(QString item);
-
-    // 从串口读取的数据
-    Q_SIGNAL void sigSerialPortData(QByteArray data);
 
     // 从串口读取后 并经过处理后 的数据
     Q_SIGNAL void sigDataCompleted(QByteArray data);
 
+    // 发送到本地串口或网络
     Q_SIGNAL void sigSendData(QByteArray data);
 
 private Q_SLOTS:
+    //
     Q_SLOT void refreshSerialPort();
 
     // 收到数据后 进行处理 处理完后 直接显示
@@ -95,6 +101,16 @@ private Q_SLOTS:
 
     // 发送数据到串口
     Q_SLOT void sendDataToSerial(const QByteArray &data);
+    // 发起连接
+    Q_SLOT void connectToHost();
+    // 接受 tcp网络数据
+    Q_SLOT void readTcpData();
+
+    // 接受serial data回调
+    Q_SLOT void onReadEvent(const char *portName, unsigned int readBufferLen) override;
+
+    // 打开或关闭 串口(本地/远程)
+    Q_SLOT void openOrCloseSerialPort(bool check);
 
 public Q_SLOT:
     Q_SLOT void hideSecondaryWindow();
@@ -112,6 +128,7 @@ private:
     std::shared_ptr<maddy::ParserConfig> config_;
     std::unique_ptr<maddy::Parser> parser_;
     ElaIconButton *iconBtn_refresh_;
+    ElaIconButton *iconBtn_url_refresh_;
 
     ThreadPool threadPool_;
     std::atomic_bool isStop_ = false;
@@ -122,6 +139,9 @@ private:
     float animationProgress = 0;
     QTimer *animationTimer;
     QTimer *autoSendTimer_;
+
+    QTcpSocket *tcp_socket_ = nullptr;
+    std::atomic_bool isRemote = false; // true: 启用远程调试, false: 启用本地调试(不启用远程调试)
 };
 
 
