@@ -50,13 +50,13 @@ cmake --build ./build/
 
 ### 生成 ts文件
 ```powershell
-lupdate -recursive . -ts translations/zh_CN.ts translations/en_US.ts
+lupdate -recursive . -ts res/translations/zh_CN.ts res/translations/en_US.ts
 ```
 
 ### ts文件 -> qm文件
 
 ```
-lrelease translations/zh_CN.ts translations/en_US.ts
+lrelease res/translations/zh_CN.ts res/translations/en_US.ts
 ```
 
 然后在 [resources.qrc](resources.qrc) 添加 qm文件路径

@@ -137,10 +137,10 @@ void mainWindow::initButton() {
     more_tools_button_->setFixedSize(30, 30);
 
     more_menu_ = new ElaMenu;
-    auto serial_action = more_menu_->addElaIconAction(ElaIconType::Plug, tr("serial"));
-    auto settings_action = more_menu_->addElaIconAction(ElaIconType::Gear, tr("setting"));
-    connect(serial_action, &QAction::triggered, this, &mainWindow::newSerialWindow);
-    connect(settings_action, &QAction::triggered, this, [&]() {
+    serial_action_ = more_menu_->addElaIconAction(ElaIconType::Plug, tr("serial"));
+    settings_action_ = more_menu_->addElaIconAction(ElaIconType::Gear, tr("setting"));
+    connect(serial_action_, &QAction::triggered, this, &mainWindow::newSerialWindow);
+    connect(settings_action_, &QAction::triggered, this, [&]() {
         settingsWindow *w = new settingsWindow;
         int idx = ui->tabWidget->addTab(w, tr("setting"));
         ui->tabWidget->setCurrentIndex(idx);
@@ -198,6 +198,9 @@ void mainWindow::changeEvent(QEvent *event) {
                     ui->tabWidget->tabBar()->setTabText(i, tr("setting"));
                 }
             }
+
+            serial_action_->setText(tr("serial"));
+            settings_action_->setText(tr("setting"));
         }
     }
 

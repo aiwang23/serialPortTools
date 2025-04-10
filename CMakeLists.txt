@@ -28,6 +28,7 @@ find_package(Qt6 COMPONENTS
         Gui
         Widgets
         LinguistTools
+        Network
         REQUIRED)
 
 add_executable(serialPortTools WIN32
@@ -57,6 +58,10 @@ add_executable(serialPortTools WIN32
         src/cmdlineedit.ui
 
         resources.qrc
+        src/serialserver.cpp
+        src/serialserver.h
+        src/serialserver.ui
+        src/tcpServer.h
 )
 
 # 添加资源文件
@@ -73,6 +78,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
             Qt::Core
             Qt::Gui
             Qt::Widgets
+            Qt6::Network
             ElaWidgetToolsd.lib
             libcserialportd.lib
     )
@@ -83,6 +89,7 @@ elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
             Qt::Core
             Qt::Gui
             Qt::Widgets
+            Qt6::Network
             ElaWidgetTools.lib
             libcserialport.lib
     )

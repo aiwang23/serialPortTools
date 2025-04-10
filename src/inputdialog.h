@@ -35,6 +35,10 @@ protected:
 
     void changeEvent(QEvent *event) override;
 
+    bool eventFilter(QObject *watched, QEvent *event) override;
+
+    void keyReleaseEvent(QKeyEvent *event) override;
+
 Q_SIGNALS:
     Q_SIGNAL void finished();
 

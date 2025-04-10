@@ -51,7 +51,9 @@ private:
     Ui::mainWindow *ui;
     ElaIconButton *new_icon_button_;
     ElaToolButton *more_tools_button_;
-    ElaMenu* more_menu_;
+    ElaMenu *more_menu_;
+    QAction *serial_action_;
+    QAction *settings_action_;
     QTranslator *translator_;
 };
 

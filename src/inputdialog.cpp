@@ -16,6 +16,7 @@ inputDialog::inputDialog(const QString &titleName, const QString &text, QWidget 
     setWindowTitle(titleName);
     setWindowButtonFlags(ElaAppBarType::CloseButtonHint);
     ui->lineEdit->setText(text);
+    ui->lineEdit->installEventFilter(this);
 
     // 设置窗口模态（阻止其他窗口操作）
     setWindowModality(Qt::ApplicationModal);
@@ -56,11 +57,35 @@ void inputDialog::changeEvent(QEvent *event) {
             // this event is send if a translator is loaded
             case QEvent::LanguageChange:
                 ui->retranslateUi(this);
-            break;
+                break;
             default:
                 break;
         }
     }
 
     ElaWidget::changeEvent(event);
+}
+
+bool inputDialog::eventFilter(QObject *watched, QEvent *event) {
+    if (watched == ui->lineEdit && event->type() == QEvent::KeyPress) {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        if (keyEvent->key() == Qt::Key_Escape) {
+            // ESC键被按下
+            inputText_.clear();
+            close();
+            emit finished();
+
+            return true; // 表示事件已处理
+        }
+    }
+    return ElaWidget::eventFilter(watched, event);
+}
+
+void inputDialog::keyReleaseEvent(QKeyEvent *event) {
+    if (Qt::Key_Escape == event->key()) {
+        inputText_.clear();
+        close();
+        emit finished();
+    }
+    ElaWidget::keyReleaseEvent(event);
 }
