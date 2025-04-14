@@ -26,6 +26,7 @@ settingsWindow::settingsWindow(QWidget *parent) : QWidget(parent), ui(new Ui::se
         <h4> 4.https://github.com/progsource/maddy</h4>
         <h4> 5.https://github.com/cameron314/concurrentqueue</h4>
         <h4> 6.https://github.com/progschj/ThreadPool</h4>
+        <h4> 7.https://github.com/nlohmann/json</h4>
     )";
     ui->plainTextEdit->appendHtml(html_about);
     // 只读
@@ -46,12 +47,26 @@ void settingsWindow::initComboBox() {
     ui->comboBox_language->addItems(
         {"zh_CN", "en_US"}
     );
+
+    ui->comboBox_default_new_window->addItems(
+        {"serial window", "serial server"}
+    );
+
+    defaultNewWindowMap_ = {
+        {"serial window", defaultNewWindowType::serialServer},
+        {"serial server", defaultNewWindowType::serialServer}
+    };
 }
 
 void settingsWindow::initSignalSlots() {
-    connect(ui->comboBox_language, &ElaComboBox::currentTextChanged, this,[this]() {
+    connect(ui->comboBox_language, &ElaComboBox::currentTextChanged, this, [this]() {
         QString text = ui->comboBox_language->currentText();
         emit sigLanguageChanged(text);
+    });
+    connect(ui->comboBox_default_new_window, &ElaComboBox::currentTextChanged, this, [this]() {
+        QString text = ui->comboBox_default_new_window->currentText();
+        auto rs = defaultNewWindowMap_.at(text);
+        emit sigDefaultNewWindowChanged(rs);
     });
 }
 
@@ -61,7 +76,7 @@ void settingsWindow::changeEvent(QEvent *event) {
             // this event is send if a translator is loaded
             case QEvent::LanguageChange:
                 ui->retranslateUi(this);
-            break;
+                break;
             default:
                 break;
         }

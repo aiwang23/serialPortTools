@@ -50,6 +50,20 @@
         </layout>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="ElaText" name="label_default_new_window">
+           <property name="text">
+            <string>default new window</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="ElaComboBox" name="comboBox_default_new_window"/>
+         </item>
+        </layout>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>

@@ -175,6 +175,24 @@ void serialServer::onReadEvent(const char *portName, unsigned int readBufferLen)
     }
 }
 
+void serialServer::changeEvent(QEvent *event) {
+    if (event) {
+        switch (event->type()) {
+            // this event is send if a translator is loaded
+            case QEvent::LanguageChange:
+                ui->retranslateUi(this);
+                ui->toggleswitch_net_open->setText(tr(ui->toggleswitch_net_open->getIsToggled()
+                                                          ? "close"
+                                                          : "open"));
+                break;
+            default:
+                break;
+        }
+    }
+
+    QWidget::changeEvent(event);
+}
+
 int64_t serialServer::writeSerialList(const std::vector<std::string> &list) {
     nlohmann::json json;
     json["type"] = "serialList";

@@ -10,6 +10,7 @@
 #include <QWidget>
 
 
+enum class defaultNewWindowType;
 class ElaMenu;
 class QTranslator;
 class ElaIconButton;
@@ -45,6 +46,7 @@ Q_SIGNALS:
     Q_SIGNAL void showSecondaryWindow();
 
 public Q_SLOTS:
+    Q_SLOT void newWindow();
     Q_SLOT void newSerialWindow();
     Q_SLOT void newSerialSerVer();
 
@@ -57,6 +59,7 @@ private:
     QAction *settings_action_;
     QAction * serialServer_action_;
     QTranslator *translator_;
+    defaultNewWindowType default_new_window_;
 };
 
 

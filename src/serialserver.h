@@ -44,6 +44,9 @@ public:
 
     void onReadEvent(const char *portName, unsigned int readBufferLen) override;
 
+protected:
+    void changeEvent(QEvent *) override;
+
 private:
     int64_t writeSerialList(const std::vector<std::string> &list);
 

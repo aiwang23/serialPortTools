@@ -46,7 +46,8 @@ static bool isSystemDarkTheme() {
     return isDark;
 }
 
-mainWindow::mainWindow(QWidget *parent) : ElaWidget(parent), ui(new Ui::mainWindow) {
+mainWindow::mainWindow(QWidget *parent) : ElaWidget(parent), ui(new Ui::mainWindow),
+                                          default_new_window_(defaultNewWindowType::serialWindow) {
     // 获取系统语言
     QString systemLang = QLocale::system().name(); // 例如: "zh_CN", "en_US"
     // 尝试加载对应的.qm文件
@@ -105,8 +106,8 @@ void mainWindow::initSignalSlots() {
         );
     });
 
-    // 添加 serial window
-    connect(new_serial_button_, &QPushButton::clicked, this, &mainWindow::newSerialWindow);
+    // 新建 window
+    connect(new_serial_button_, &QPushButton::clicked, this, &mainWindow::newWindow);
 
     // 剩余最后一个小窗格之后, 点击关闭，直接退出
     connect(ui->tabWidget, &ElaTabWidget::tabCloseRequested, this, [&]() {
@@ -144,7 +145,7 @@ void mainWindow::initButton() {
         int idx = ui->tabWidget->addTab(w, tr("setting"));
         ui->tabWidget->setCurrentIndex(idx);
 
-        connect(w, &settingsWindow::sigLanguageChanged, this, [this](QString language) {
+        connect(w, &settingsWindow::sigLanguageChanged, this, [this](const QString &language) {
             // 移除旧的翻译器
             QCoreApplication::removeTranslator(translator_);
 
@@ -161,9 +162,12 @@ void mainWindow::initButton() {
             // 通知所有窗口重新翻译UI
             QCoreApplication::postEvent(QCoreApplication::instance(),
                                         new QEvent(QEvent::LanguageChange));
-            for (QWidget *widget: QApplication::allWidgets()) {
-                widget->update();
+            for (QWidget *w_i: QApplication::allWidgets()) {
+                w_i->update();
             }
+        });
+        connect(w, &settingsWindow::sigDefaultNewWindowChanged, this, [this](const defaultNewWindowType &type) {
+            default_new_window_ = type;
         });
     });
 
@@ -199,6 +203,7 @@ void mainWindow::changeEvent(QEvent *event) {
             }
 
             serial_action_->setText(tr("serial"));
+            serialServer_action_->setText(tr("server"));
             settings_action_->setText(tr("setting"));
         }
     }
@@ -207,13 +212,34 @@ void mainWindow::changeEvent(QEvent *event) {
 }
 
 
-void mainWindow::newSerialWindow() {
-    inputDialog dialog{QString(tr("new serial window"))};
+void mainWindow::newWindow() {
+    inputDialog dialog{QString(tr("new window"))};
 
     dialog.exec();
     QString text = dialog.getInputText();
     if (not text.isEmpty()) {
-        auto *w = new serialWindow;
+        QWidget *w = nullptr;
+        if (defaultNewWindowType::serialWindow == default_new_window_)
+            w = new serialWindow;
+        else if (defaultNewWindowType::serialServer == default_new_window_)
+            w = new serialServer;
+
+        int idx = ui->tabWidget->addTab(w, text);
+        ui->tabWidget->setCurrentIndex(idx);
+
+        // 开场白
+        ElaMessageBar::information(ElaMessageBarType::TopLeft, tr("info"), tr("new window succeed"), 2000, this);
+    }
+}
+
+void mainWindow::newSerialWindow() {
+    inputDialog dialog{QString(tr("new window"))};
+
+    dialog.exec();
+    QString text = dialog.getInputText();
+    if (not text.isEmpty()) {
+        serialWindow *w = new serialWindow;
+
         int idx = ui->tabWidget->addTab(w, text);
         ui->tabWidget->setCurrentIndex(idx);
 

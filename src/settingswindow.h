@@ -10,6 +10,8 @@
 
 QT_BEGIN_NAMESPACE
 
+enum class defaultNewWindowType { serialWindow, serialServer };
+
 namespace Ui {
     class settingsWindow;
 }
@@ -34,8 +36,12 @@ protected:
 Q_SIGNALS:
     Q_SIGNAL void sigLanguageChanged(QString language);
 
+    Q_SIGNAL void sigDefaultNewWindowChanged(defaultNewWindowType type);
+
 private:
     Ui::settingsWindow *ui;
+
+    std::unordered_map<QString, defaultNewWindowType> defaultNewWindowMap_;
 };
 
 

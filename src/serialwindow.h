@@ -67,6 +67,7 @@ public:
     ~serialWindow() override;
 
 protected:
+    // 国际化 刷新时 语言切换
     void changeEvent(QEvent *event) override;
 
 private:
@@ -75,6 +76,8 @@ private:
     void initSignalSlots();
 
     void initText();
+
+    void initUI();
 
     // 发送 serial Settings 到server ,请求打开 serial
     int64_t writeSerialSettings(const serialSettings& settings);
@@ -111,6 +114,21 @@ private Q_SLOTS:
 
     // 打开或关闭 串口(本地/远程)
     Q_SLOT void openOrCloseSerialPort(bool check);
+
+    // 发送模式切换
+    Q_SLOT void sendModeChange(const QString &item);
+    // 收到数据显示到窗口上
+    Q_SLOT void showSerialData(const QString &data);
+    // 数据窗口 发送模式切换时的动画
+    Q_SLOT void dataWidgetAnimation();
+    // 把收到的数据保存成文件
+    Q_SLOT void saveDataWidgetToFile();
+    // 打开或关闭 自动发送模式
+    Q_SLOT void openOrCloseAutoMode(bool check);
+    // 改变自动发送模式的周期
+    Q_SLOT void autoModeCycleChange();
+    // 打开或关闭远程模式
+    Q_SLOT void enableRemote(bool check);
 
 public Q_SLOT:
     Q_SLOT void hideSecondaryWindow();

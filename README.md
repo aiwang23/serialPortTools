@@ -22,13 +22,14 @@
 
 [ubuntu-badge]: https://img.shields.io/debian/v/apt
 
-## 使用的第三方库
+## 使用的第三方库和对应的版本
 - [Qt](https://github.com/qt) 6.4
-- [ElaWidgetTools](https://github.com/Liniyous/ElaWidgetTools)
+- [ElaWidgetTools](https://github.com/Liniyous/ElaWidgetTools) 
 - [CSerialPort](https://github.com/itas109/CSerialPort)
 - [maddy](https://github.com/progsource/maddy)
 - [concurrentqueue](https://github.com/cameron314/concurrentqueue)
 - [ThreadPool](https://github.com/progschj/ThreadPool)
+- [json](https://github.com/nlohmann/json)
 
 ## 编译
 > 编译编译本项目之前 先编译以下的库
@@ -39,6 +40,9 @@
 > - CMAKE_PREFIX_PATH 
 > - ELA_LIB_PATH
 > - C_SERIAL_PORT_LIB_PATH
+
+### Windows10+
+本项目编译器使用 msvc2022
 
 ```shell
 cmake -S . -B ./build/

@@ -151,43 +151,12 @@ serialWindow::serialWindow(QWidget *parent)
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
                 continue;
             }
-            convertDataAndSend(std::move(data));
+            convertDataAndSend(data);
         }
     });
 
-    // 只读 不可编辑
-    ui->plainTextEdit_out->setReadOnly(true);
-    // Ela 要把ObjectName 的名称改回这个"ElaPlainTextEdit"才能正常使用深色模式
-    ui->plainTextEdit_out->setObjectName("ElaPlainTextEdit");
-    ui->plainTextEdit_in->setObjectName("ElaPlainTextEdit");
-
-    ui->toggleswitch_open->setText(tr("open"));
-    // 开始按钮的默认大小
-    ui->toggleswitch_open->setMinimumWidth(191);
-    // 刷新串口按钮 在 ui->comboBox_port 右侧
-    iconBtn_refresh_ = new ElaIconButton{ElaIconType::ArrowRotateLeft, 17, 20, 20};
-    ui->horizontalLayout_0->addWidget(iconBtn_refresh_);
-
-    // 刷新URL按钮 在 serialWindow 顶部
-    iconBtn_url_refresh_ = new ElaIconButton{ElaIconType::ArrowRotateLeft, 17, 25, 25};
-    ui->horizontalLayout_top->insertWidget(0, iconBtn_url_refresh_);
-    ui->lineEdit_url->setEnabled(false);
-    iconBtn_url_refresh_->setEnabled(false);
-
-    // 默认 MAN 手动模式
-    ui->cmdwidget->hide();
-    ui->plainTextEdit_in->show();
-    ui->pushButton_send->show();
-
-    ui->lineEdit_auto_mode->setIsClearButtonEnable(false);
-    ui->lineEdit_auto_mode->setFixedWidth(60);
-    ui->pushButton_auto_mode_sec->setFixedSize(30, 30);
-    // ui->pushButton_auto_mode_sec->setDisabled(true);
-
-    ui->label_auto_mode_cycle->hide();
-    ui->lineEdit_auto_mode->hide();
-    ui->pushButton_auto_mode_sec->hide();
-    ui->toggleswitch_auto_mode->hide();
+    // 初始化 UI 组件
+    initUI();
 
     dataWidgetRatio_ = {
         {
@@ -206,10 +175,6 @@ serialWindow::serialWindow(QWidget *parent)
     // 默认状态下 输出窗口比例70%，输入窗口占30%
     ui->splitter_data->setSizes(dataWidgetRatio_[sendMode::MAN]);
 
-    // 初始化 combobox 组件
-    initComboBox();
-    // 初始化 text 组件
-    initText();
     // init signals 和 slots
     initSignalSlots();
 
@@ -235,6 +200,9 @@ void serialWindow::changeEvent(QEvent *event) {
             // this event is send if a translator is loaded
             case QEvent::LanguageChange:
                 ui->retranslateUi(this);
+                ui->toggleswitch_open->setText(tr(ui->toggleswitch_open->getIsToggled()
+                                                      ? "close"
+                                                      : "open"));
                 break;
             default:
                 break;
@@ -305,19 +273,7 @@ void serialWindow::initSignalSlots() {
     });
 
     // 处理完数据，插入到 plainTextEdit_out
-    connect(this, &serialWindow::sigDataCompleted, this, [this](const QString &data) {
-        if (dataType::TEXT == show_type_) {
-            ui->plainTextEdit_out->moveCursor(QTextCursor::End);
-            ui->plainTextEdit_out->insertPlainText(data);
-        } else if (dataType::HEX == show_type_) {
-            ui->plainTextEdit_out->moveCursor(QTextCursor::End);
-            ui->plainTextEdit_out->insertPlainText(data);
-        } else if (dataType::HTML == show_type_) {
-            ui->plainTextEdit_out->appendHtml(data);
-        } else if (dataType::MARKDOWN == show_type_) {
-            ui->plainTextEdit_out->appendHtml(data);
-        }
-    });
+    connect(this, &serialWindow::sigDataCompleted, this, &serialWindow::showSerialData);
 
     // 显示类型切换
     connect(ui->comboBox_show_type, &ElaComboBox::currentTextChanged, this, [this](const QString &item) {
@@ -325,64 +281,10 @@ void serialWindow::initSignalSlots() {
     });
 
     // 发送模式切换
-    connect(ui->comboBox_send_mode, &ElaComboBox::currentTextChanged, this, [this](const QString &item) {
-        send_mode_ = sendModeFrom(item.toStdString());
-        if (sendMode::MAN == send_mode_) {
-            ui->cmdwidget->hide();
-            ui->plainTextEdit_in->show();
-            ui->pushButton_send->show();
-
-            ui->label_auto_mode_cycle->hide();
-            ui->lineEdit_auto_mode->hide();
-            ui->pushButton_auto_mode_sec->hide();
-            ui->toggleswitch_auto_mode->hide();
-            // 重置动画进度
-            animationProgress = 0;
-            animationTimer->start();
-        } else if (sendMode::CMD == send_mode_) {
-            ui->cmdwidget->show();
-            ui->plainTextEdit_in->hide();
-            ui->pushButton_send->hide();
-
-            ui->label_auto_mode_cycle->hide();
-            ui->lineEdit_auto_mode->hide();
-            ui->pushButton_auto_mode_sec->hide();
-            ui->toggleswitch_auto_mode->hide();
-            // 重置动画进度
-            animationProgress = 0;
-            animationTimer->start();
-        } else if (sendMode::AUTO == send_mode_) {
-            ui->cmdwidget->hide();
-            ui->plainTextEdit_in->show();
-            ui->pushButton_send->show();
-
-            ui->label_auto_mode_cycle->show();
-            ui->lineEdit_auto_mode->show();
-            ui->pushButton_auto_mode_sec->show();
-            ui->toggleswitch_auto_mode->show();
-        }
-    });
+    connect(ui->comboBox_send_mode, &ElaComboBox::currentTextChanged, this, &serialWindow::sendModeChange);
 
     // 自动模式 splitter_data 比例切换
-    connect(animationTimer, &QTimer::timeout, this, [this]() {
-        animationProgress += 0.02; // 每帧增加2%的进度
-        // 获取当前尺寸
-        QList<int> currentSizes = ui->splitter_data->sizes();
-        // 计算目标尺寸
-        QList<int> targetSizes = dataWidgetRatio_[send_mode_];
-
-        if (animationProgress >= 1.0) {
-            animationProgress = 1.0;
-            animationTimer->stop();
-        }
-
-        // 计算中间值
-        QList<int> intermediateSizes;
-        intermediateSizes << currentSizes[0] + (targetSizes[0] - currentSizes[0]) * animationProgress
-                << currentSizes[1] + (targetSizes[1] - currentSizes[1]) * animationProgress;
-
-        ui->splitter_data->setSizes(intermediateSizes);
-    });
+    connect(animationTimer, &QTimer::timeout, this, &serialWindow::dataWidgetAnimation);
 
     // 用户拖动 ui->splitter_data 的时候，记录一下位置
     connect(ui->splitter_data, &QSplitter::splitterMoved, this, [this](int pos, int index) {
@@ -401,36 +303,7 @@ void serialWindow::initSignalSlots() {
     connect(iconBtn_refresh_, &ElaIconButton::clicked, this, &serialWindow::refreshSerialPort);
 
     // 保存接收数据到文件
-    connect(ui->pushButton_save_file, &ElaPushButton::clicked, this, [this]() {
-        QString fileName = QFileDialog::getSaveFileName(this, tr("Save file"), "",
-                                                        "Text file (*.txt);;HTML file(*.html);;Markdown file(*.md);;All file(*)");
-        if (fileName.isEmpty()) {
-            return;
-        }
-        // 确保文件名可以 .txt 结尾（可选）
-        if (!fileName.endsWith(".txt", Qt::CaseInsensitive)) {
-            fileName += ".txt";
-        } else if (fileName.endsWith(".html", Qt::CaseInsensitive)) {
-            fileName += ".html";
-        } else if (fileName.endsWith(".md", Qt::CaseInsensitive)) {
-            fileName += ".md";
-        }
-
-        // 创建文件并写入文本
-        QFile file(fileName);
-        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            ElaMessageBar::error(ElaMessageBarType::TopLeft, tr("error"), tr("can not save ~~").arg(fileName), 3000,
-                                 this);
-            return;
-        }
-
-        QTextStream out(&file);
-        out << ui->plainTextEdit_out->toPlainText(); // 写入文本
-        file.close();
-
-        ElaMessageBar::information(ElaMessageBarType::TopLeft, tr("info"), tr("save successfully").arg(fileName), 3000,
-                                   this);
-    });
+    connect(ui->pushButton_save_file, &ElaPushButton::clicked, this, &serialWindow::saveDataWidgetToFile);
 
     connect(ui->pushButton_clear, &ElaPushButton::clicked, this, [this]() {
         ui->plainTextEdit_out->clear();
@@ -451,55 +324,13 @@ void serialWindow::initSignalSlots() {
     });
 
     // 自动模式 是否打开
-    connect(ui->toggleswitch_auto_mode, &ElaToggleSwitch::toggled, this, [this](bool check) {
-        if (check) {
-            bool rs;
-            double sec = ui->lineEdit_auto_mode->text().toDouble(&rs);
-            if (not rs) {
-                ElaMessageBar::error(ElaMessageBarType::TopLeft, tr("error"), tr("The input cycle is invalid"), 3000,
-                                     this);
-                ui->toggleswitch_auto_mode->setIsToggled(false);
-                return;
-            }
-            autoSendTimer_->start(static_cast<int>(sec * 1000));
-        } else {
-            autoSendTimer_->stop();
-        }
-    });
+    connect(ui->toggleswitch_auto_mode, &ElaToggleSwitch::toggled, this, &serialWindow::openOrCloseAutoMode);
 
     // 修改自动模式 周期
-    connect(ui->lineEdit_auto_mode, &ElaLineEdit::editingFinished, this, [this]() {
-        if (not autoSendTimer_->isActive()) {
-            return;
-        }
-        bool rs;
-        double sec = ui->lineEdit_auto_mode->text().toDouble(&rs);
-        if (not rs) {
-            ElaMessageBar::error(ElaMessageBarType::TopLeft, tr("error"), tr("The input cycle is invalid"), 3000, this);
-            ui->toggleswitch_auto_mode->setIsToggled(false);
-            return;
-        }
-        autoSendTimer_->stop();
-        autoSendTimer_->start(static_cast<int>(sec * 1000));
-    });
+    connect(ui->lineEdit_auto_mode, &ElaLineEdit::editingFinished, this, &serialWindow::autoModeCycleChange);
 
     // 启用远程调试
-    connect(ui->toggleswitch_url, &ElaToggleSwitch::toggled, this, [this](bool check) {
-        if (check) {
-            // 打开远程调试
-            isRemote = true;
-            ui->lineEdit_url->setEnabled(true);
-            iconBtn_url_refresh_->setEnabled(true);
-        } else {
-            // 关闭远程调试
-            isRemote = false;
-            if (tcp_socket_->state() == QAbstractSocket::ConnectedState) {
-                tcp_socket_->disconnectFromHost();
-            }
-            ui->lineEdit_url->setEnabled(false);
-            iconBtn_url_refresh_->setEnabled(false);
-        }
-    });
+    connect(ui->toggleswitch_url, &ElaToggleSwitch::toggled, this, &serialWindow::enableRemote);
 
     // 回车 发起远程调试
     connect(ui->lineEdit_url, &ElaLineEdit::returnPressed, this, &serialWindow::connectToHost);
@@ -509,6 +340,7 @@ void serialWindow::initSignalSlots() {
 
     // tcp 连接到了
     connect(tcp_socket_, &QTcpSocket::connected, this, [this]() {
+        ElaMessageBar::information(ElaMessageBarType::TopLeft, tr("info"), tr("connected"), 3000, this);
     });
 
     // tcp 断开连接
@@ -538,6 +370,49 @@ void serialWindow::initText() {
     ui->label_send_mode->setTextPixelSize(13);
     ui->label_auto_mode_cycle->setTextPixelSize(13);
     ui->label_url->setTextPixelSize(13);
+}
+
+void serialWindow::initUI() {
+    // 只读 不可编辑
+    ui->plainTextEdit_out->setReadOnly(true);
+    // Ela 要把ObjectName 的名称改回这个"ElaPlainTextEdit"才能正常使用深色模式
+    ui->plainTextEdit_out->setObjectName("ElaPlainTextEdit");
+    ui->plainTextEdit_in->setObjectName("ElaPlainTextEdit");
+
+    ui->toggleswitch_open->setText(tr("open"));
+    // 开始按钮的默认大小
+    ui->toggleswitch_open->setMinimumWidth(191);
+    // 刷新串口按钮 在 ui->comboBox_port 右侧
+    iconBtn_refresh_ = new ElaIconButton{ElaIconType::ArrowRotateLeft, 17, 20, 20};
+    ui->horizontalLayout_0->addWidget(iconBtn_refresh_);
+
+    // 刷新URL按钮 在 serialWindow 顶部
+    iconBtn_url_refresh_ = new ElaIconButton{ElaIconType::ArrowRotateLeft, 17, 25, 25};
+    ui->horizontalLayout_top->insertWidget(1, iconBtn_url_refresh_);
+    ui->lineEdit_url->setEnabled(false);
+    iconBtn_url_refresh_->setEnabled(false);
+    iconBtn_url_refresh_->hide();
+    ui->lineEdit_url->hide();
+
+    // 默认 MAN 手动模式
+    ui->cmdwidget->hide();
+    ui->plainTextEdit_in->show();
+    ui->pushButton_send->show();
+
+    ui->lineEdit_auto_mode->setIsClearButtonEnable(false);
+    ui->lineEdit_auto_mode->setFixedWidth(60);
+    ui->pushButton_auto_mode_sec->setFixedSize(30, 30);
+    // ui->pushButton_auto_mode_sec->setDisabled(true);
+
+    ui->label_auto_mode_cycle->hide();
+    ui->lineEdit_auto_mode->hide();
+    ui->pushButton_auto_mode_sec->hide();
+    ui->toggleswitch_auto_mode->hide();
+
+    // 初始化 combobox 组件
+    initComboBox();
+    // 初始化 text 组件
+    initText();
 }
 
 int64_t serialWindow::writeSerialSettings(const serialSettings &settings) {
@@ -626,6 +501,161 @@ void serialWindow::openOrCloseSerialPort(bool checked) {
     }
 }
 
+void serialWindow::sendModeChange(const QString &item) {
+    send_mode_ = sendModeFrom(item.toStdString());
+    if (sendMode::MAN == send_mode_) {
+        ui->cmdwidget->hide();
+        ui->plainTextEdit_in->show();
+        ui->pushButton_send->show();
+
+        ui->label_auto_mode_cycle->hide();
+        ui->lineEdit_auto_mode->hide();
+        ui->pushButton_auto_mode_sec->hide();
+        ui->toggleswitch_auto_mode->hide();
+        // 重置动画进度
+        animationProgress = 0;
+        animationTimer->start();
+    } else if (sendMode::CMD == send_mode_) {
+        ui->cmdwidget->show();
+        ui->plainTextEdit_in->hide();
+        ui->pushButton_send->hide();
+
+        ui->label_auto_mode_cycle->hide();
+        ui->lineEdit_auto_mode->hide();
+        ui->pushButton_auto_mode_sec->hide();
+        ui->toggleswitch_auto_mode->hide();
+        // 重置动画进度
+        animationProgress = 0;
+        animationTimer->start();
+    } else if (sendMode::AUTO == send_mode_) {
+        ui->cmdwidget->hide();
+        ui->plainTextEdit_in->show();
+        ui->pushButton_send->show();
+
+        ui->label_auto_mode_cycle->show();
+        ui->lineEdit_auto_mode->show();
+        ui->pushButton_auto_mode_sec->show();
+        ui->toggleswitch_auto_mode->show();
+    }
+}
+
+void serialWindow::showSerialData(const QString &data) {
+    if (dataType::TEXT == show_type_) {
+        ui->plainTextEdit_out->moveCursor(QTextCursor::End);
+        ui->plainTextEdit_out->insertPlainText(data);
+    } else if (dataType::HEX == show_type_) {
+        ui->plainTextEdit_out->moveCursor(QTextCursor::End);
+        ui->plainTextEdit_out->insertPlainText(data);
+    } else if (dataType::HTML == show_type_) {
+        ui->plainTextEdit_out->appendHtml(data);
+    } else if (dataType::MARKDOWN == show_type_) {
+        ui->plainTextEdit_out->appendHtml(data);
+    }
+}
+
+void serialWindow::dataWidgetAnimation() {
+    animationProgress += 0.02; // 每帧增加2%的进度
+    // 获取当前尺寸
+    QList<int> currentSizes = ui->splitter_data->sizes();
+    // 计算目标尺寸
+    QList<int> targetSizes = dataWidgetRatio_[send_mode_];
+
+    if (animationProgress >= 1.0) {
+        animationProgress = 1.0;
+        animationTimer->stop();
+    }
+
+    // 计算中间值
+    QList<int> intermediateSizes;
+    intermediateSizes << currentSizes[0] + (targetSizes[0] - currentSizes[0]) * animationProgress
+            << currentSizes[1] + (targetSizes[1] - currentSizes[1]) * animationProgress;
+
+    ui->splitter_data->setSizes(intermediateSizes);
+}
+
+void serialWindow::saveDataWidgetToFile() {
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save file"), "",
+                                                    "Text file (*.txt);;HTML file(*.html);;Markdown file(*.md);;All file(*)");
+    if (fileName.isEmpty()) {
+        return;
+    }
+    // 确保文件名可以 .txt 结尾（可选）
+    if (!fileName.endsWith(".txt", Qt::CaseInsensitive)) {
+        fileName += ".txt";
+    } else if (fileName.endsWith(".html", Qt::CaseInsensitive)) {
+        fileName += ".html";
+    } else if (fileName.endsWith(".md", Qt::CaseInsensitive)) {
+        fileName += ".md";
+    }
+
+    // 创建文件并写入文本
+    QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        ElaMessageBar::error(ElaMessageBarType::TopLeft, tr("error"), tr("can not save ~~").arg(fileName), 3000,
+                             this);
+        return;
+    }
+
+    QTextStream out(&file);
+    out << ui->plainTextEdit_out->toPlainText(); // 写入文本
+    file.close();
+
+    ElaMessageBar::information(ElaMessageBarType::TopLeft, tr("info"), tr("save successfully").arg(fileName), 3000,
+                               this);
+}
+
+void serialWindow::openOrCloseAutoMode(bool check) {
+    if (check) {
+        bool rs;
+        double sec = ui->lineEdit_auto_mode->text().toDouble(&rs);
+        if (not rs) {
+            ElaMessageBar::error(ElaMessageBarType::TopLeft, tr("error"), tr("The input cycle is invalid"), 3000,
+                                 this);
+            ui->toggleswitch_auto_mode->setIsToggled(false);
+            return;
+        }
+        autoSendTimer_->start(static_cast<int>(sec * 1000));
+    } else {
+        autoSendTimer_->stop();
+    }
+}
+
+void serialWindow::autoModeCycleChange() {
+    if (not autoSendTimer_->isActive()) {
+        return;
+    }
+    bool rs;
+    double sec = ui->lineEdit_auto_mode->text().toDouble(&rs);
+    if (not rs) {
+        ElaMessageBar::error(ElaMessageBarType::TopLeft, tr("error"), tr("The input cycle is invalid"), 3000, this);
+        ui->toggleswitch_auto_mode->setIsToggled(false);
+        return;
+    }
+    autoSendTimer_->stop();
+    autoSendTimer_->start(static_cast<int>(sec * 1000));
+}
+
+void serialWindow::enableRemote(bool check) {
+    if (check) {
+        // 打开远程调试
+        isRemote = true;
+        ui->lineEdit_url->setEnabled(true);
+        iconBtn_url_refresh_->setEnabled(true);
+        iconBtn_url_refresh_->show();
+        ui->lineEdit_url->show();
+    } else {
+        // 关闭远程调试
+        isRemote = false;
+        if (tcp_socket_->state() == QAbstractSocket::ConnectedState) {
+            tcp_socket_->disconnectFromHost();
+            ui->toggleswitch_open->setIsToggled(false);
+        }
+        ui->lineEdit_url->setEnabled(false);
+        iconBtn_url_refresh_->setEnabled(false);
+        iconBtn_url_refresh_->hide();
+        ui->lineEdit_url->hide();
+    }
+}
 
 void serialWindow::refreshSerialPort() {
     // 获取可用串口list
