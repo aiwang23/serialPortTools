@@ -20,6 +20,9 @@ include_directories(${C_SERIAL_PORT_LIB_PATH}/include)
 link_directories(${C_SERIAL_PORT_LIB_PATH}/lib)
 
 include_directories(${CMAKE_SOURCE_DIR}/src/inc)
+include_directories(${CMAKE_SOURCE_DIR}/src/serialWindow)
+include_directories(${CMAKE_SOURCE_DIR}/src/serialServer)
+include_directories(${CMAKE_SOURCE_DIR}/src/settingsWindow)
 include_directories(.)
 include_directories(src)
 
@@ -33,35 +36,35 @@ find_package(Qt6 COMPONENTS
 
 add_executable(serialPortTools WIN32
         src/main.cpp
-        src/serialwindow.cpp
-        src/serialwindow.h
-        src/serialwindow.ui
+        src/serialWindow/serialwindow.cpp
+        src/serialWindow/serialwindow.h
+        src/serialWindow/serialwindow.ui
         src/mainwindow.cpp
         src/mainwindow.h
         src/mainwindow.ui
         src/inputdialog.cpp
         src/inputdialog.h
         src/inputdialog.ui
-        src/settingswindow.cpp
-        src/settingswindow.h
-        src/settingswindow.ui
-        src/outTextEdit.cpp
-        src/outTextEdit.h
-        src/threadPool.h
-        src/concurrentqueue.h
+        src/settingsWindow/settingswindow.cpp
+        src/settingsWindow/settingswindow.h
+        src/settingsWindow/settingswindow.ui
+        src/serialWindow/outTextEdit.cpp
+        src/serialWindow/outTextEdit.h
+        src/inc/threadPool.h
+        src/inc/moodycamel/concurrentqueue.h
 
-        src/cmdwidget.cpp
-        src/cmdwidget.h
-        src/cmdwidget.ui
-        src/cmdlineedit.cpp
-        src/cmdlineedit.h
-        src/cmdlineedit.ui
+        src/serialWindow/cmdwidget.cpp
+        src/serialWindow/cmdwidget.h
+        src/serialWindow/cmdwidget.ui
+        src/serialWindow/cmdlineedit.cpp
+        src/serialWindow/cmdlineedit.h
+        src/serialWindow/cmdlineedit.ui
 
         resources.qrc
-        src/serialserver.cpp
-        src/serialserver.h
-        src/serialserver.ui
-        src/tcpServer.h
+        src/serialServer/serialserver.cpp
+        src/serialServer/serialserver.h
+        src/serialServer/serialserver.ui
+        src/serialServer/tcpServer.h
 )
 
 # 添加资源文件

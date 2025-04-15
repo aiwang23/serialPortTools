@@ -9,8 +9,8 @@
 #include <QTimer>
 #include <CSerialPort/SerialPort.h>
 
-#include "threadPool.h"
-#include "concurrentqueue.h"
+#include "../inc/threadPool.h"
+#include "../inc/moodycamel/concurrentqueue.h"
 
 struct serialSettings;
 class QTcpSocket;

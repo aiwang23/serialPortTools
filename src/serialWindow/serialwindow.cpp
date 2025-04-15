@@ -8,25 +8,25 @@
 
 #include <ElaIconButton.h>
 
-#include "ui_serialwindow.h"
+#include "../../cmake-build-debug/serialPortTools_autogen/include/ui_serialwindow.h"
 #include <ElaTheme.h>
 #include <QSettings>
 #include <ElaMessageBar.h>
 #include <sstream>
 #include <CSerialPort/SerialPortInfo.h>
-#include <maddy/parser.h>
+#include <../inc/maddy/parser.h>
 #include <QTimer>
 #include <bitset>
 #include <QBitArray>
 #include <ElaToggleButton.h>
 #include <QFileDialog>
 #include <utility>
-#include "threadPool.h"
+#include "../inc/threadPool.h"
 #include <QPropertyAnimation>
 #include <QTcpSocket>
 
 #include "serialserver.h"
-#include "nlohmann/json.hpp"
+#include "../inc/nlohmann/json.hpp"
 
 using itas109::CSerialPortInfo;
 using itas109::SerialPortInfo;
@@ -639,6 +639,11 @@ void serialWindow::enableRemote(bool check) {
     if (check) {
         // 打开远程调试
         isRemote = true;
+        if (serial_port_.isOpen()) {
+            // 假如本地的串口已经打开了,要断开连接
+            serial_port_.close();
+            ui->toggleswitch_open->setIsToggled(false);
+        }
         ui->lineEdit_url->setEnabled(true);
         iconBtn_url_refresh_->setEnabled(true);
         iconBtn_url_refresh_->show();

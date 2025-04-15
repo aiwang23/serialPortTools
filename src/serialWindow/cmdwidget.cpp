@@ -8,7 +8,7 @@
 
 #include <QFocusEvent>
 
-#include "ui_cmdWidget.h"
+#include "../../cmake-build-debug/serialPortTools_autogen/include/ui_cmdWidget.h"
 #include "cmdlineedit.h"
 
 cmdWidget::cmdWidget(QWidget *parent) : QWidget(parent), ui(new Ui::cmdWidget) {
