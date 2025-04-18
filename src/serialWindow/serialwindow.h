@@ -82,13 +82,9 @@ private:
     // 发送 serial Settings 到server ,请求打开 serial
     int64_t writeSerialSettings(const serialSettings& settings);
 
+    int64_t writeSerialClose();
+
 Q_SIGNALS:
-    // 清空 comboBox_port items
-    Q_SIGNAL void sigClearComboBoxPort();
-
-    // 添加 comboBox_port items
-    Q_SIGNAL void sigAddSerialPort(QString item);
-
     // 从串口读取后 并经过处理后 的数据
     Q_SIGNAL void sigDataCompleted(QByteArray data);
 
@@ -113,7 +109,7 @@ private Q_SLOTS:
     Q_SLOT void onReadEvent(const char *portName, unsigned int readBufferLen) override;
 
     // 打开或关闭 串口(本地/远程)
-    Q_SLOT void openOrCloseSerialPort(bool check);
+    void openOrCloseSerialPort(bool check);
 
     // 发送模式切换
     Q_SLOT void sendModeChange(const QString &item);

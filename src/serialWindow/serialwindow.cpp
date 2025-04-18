@@ -262,16 +262,6 @@ void serialWindow::initSignalSlots() {
         emit sigSendData(data.toUtf8());
     });
 
-    // 清空 comboBox_port items
-    connect(this, &serialWindow::sigClearComboBoxPort, this, [this]() {
-        ui->comboBox_port->clear();
-    });
-
-    // 添加 comboBox_port items
-    connect(this, &serialWindow::sigAddSerialPort, this, [this](const QString &item) {
-        ui->comboBox_port->addItem(item);
-    });
-
     // 处理完数据，插入到 plainTextEdit_out
     connect(this, &serialWindow::sigDataCompleted, this, &serialWindow::showSerialData);
 
@@ -408,6 +398,8 @@ void serialWindow::initUI() {
     ui->lineEdit_auto_mode->hide();
     ui->pushButton_auto_mode_sec->hide();
     ui->toggleswitch_auto_mode->hide();
+    ui->splitter_main->setSizes({1000, 100});
+
 
     // 初始化 combobox 组件
     initComboBox();
@@ -423,6 +415,14 @@ int64_t serialWindow::writeSerialSettings(const serialSettings &settings) {
     json["data"]["dataBits"] = settings.dataBits;
     json["data"]["parity"] = settings.parity;
     json["data"]["stopBit"] = settings.stopBit;
+
+    QByteArray text = QByteArray::fromStdString(json.dump());
+    return tcp_socket_->write(text);
+}
+
+int64_t serialWindow::writeSerialClose() {
+    nlohmann::json json;
+    json["type"] = "serialClose";
 
     QByteArray text = QByteArray::fromStdString(json.dump());
     return tcp_socket_->write(text);
@@ -486,6 +486,10 @@ void serialWindow::openOrCloseSerialPort(bool checked) {
             std::string type = ui->comboBox_show_type->currentText().toStdString();
             show_type_ = dataTypeFrom(type);
             ui->toggleswitch_open->setText(tr("close"));
+            ui->comboBox_baud->setDisabled(true);
+            ui->comboBox_databit->setDisabled(true);
+            ui->comboBox_parity->setDisabled(true);
+            ui->comboBox_stopbit->setDisabled(true);
         } else {
             // 没有可用 serials
             ElaMessageBar::error(ElaMessageBarType::TopLeft, tr("error"), tr("This Computer no avaiable port"),
@@ -495,9 +499,18 @@ void serialWindow::openOrCloseSerialPort(bool checked) {
             ui->toggleswitch_open->setIsToggled(false);
         }
     } else {
-        // 关闭
-        serial_port_.close();
+        if (isRemote) {
+            // 远程关闭
+            writeSerialClose();
+        } else {
+            // 本地关闭
+            serial_port_.close();
+        }
         ui->toggleswitch_open->setText(tr("open"));
+        ui->comboBox_baud->setEnabled(true);
+        ui->comboBox_databit->setEnabled(true);
+        ui->comboBox_parity->setEnabled(true);
+        ui->comboBox_stopbit->setEnabled(true);
     }
 }
 
@@ -809,13 +822,9 @@ void serialWindow::readTcpData() {
 }
 
 void serialWindow::hideSecondaryWindow() {
-    ui->groupBox_port->hide();
-    ui->groupBox_recv->hide();
-    ui->groupBox_send->hide();
+    ui->splitter_main->setSizes({1000, 0});
 }
 
 void serialWindow::showSecondaryWindow() {
-    ui->groupBox_port->show();
-    ui->groupBox_recv->show();
-    ui->groupBox_send->show();
+    ui->splitter_main->setSizes({1000, 100});
 }

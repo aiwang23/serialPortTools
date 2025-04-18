@@ -296,6 +296,12 @@ void serialServer::readNetData() {
         ui->lineEdit_data_bit->setText("");
         ui->lineEdit_parity->setText("");
         ui->lineEdit_stop_bit->setText("");
+
+        ui->plainTextEdit_log->appendPlainText(
+              QString{"[%0] %1 %2"}.arg(QDateTime::currentDateTime().toString())
+              .arg(serial_port_.getPortName())
+              .arg("closed")
+          );
         serial_port_.close();
     }
 }

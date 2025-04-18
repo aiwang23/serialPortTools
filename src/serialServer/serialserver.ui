@@ -24,7 +24,7 @@
     <widget class="QGroupBox" name="groupBox_port">
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_0" stretch="0,1,0">
+       <layout class="QHBoxLayout" name="horizontalLayout_0" stretch="0,0">
         <item>
          <widget class="ElaText" name="label_port">
           <property name="text">
@@ -33,25 +33,12 @@
          </widget>
         </item>
         <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
          <widget class="ElaLineEdit" name="lineEdit_serial_port"/>
         </item>
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_1" stretch="0,1,0">
+       <layout class="QHBoxLayout" name="horizontalLayout_1" stretch="0,0">
         <item>
          <widget class="ElaText" name="label_baud">
           <property name="text">
@@ -60,25 +47,12 @@
          </widget>
         </item>
         <item>
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
          <widget class="ElaLineEdit" name="lineEdit_baud_rate"/>
         </item>
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1,0">
+       <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0">
         <item>
          <widget class="ElaText" name="label_databit">
           <property name="text">
@@ -87,25 +61,12 @@
          </widget>
         </item>
         <item>
-         <spacer name="horizontalSpacer_3">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
          <widget class="ElaLineEdit" name="lineEdit_data_bit"/>
         </item>
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,1,0">
+       <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,0">
         <item>
          <widget class="ElaText" name="label_parity">
           <property name="text">
@@ -114,44 +75,18 @@
          </widget>
         </item>
         <item>
-         <spacer name="horizontalSpacer_4">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
          <widget class="ElaLineEdit" name="lineEdit_parity"/>
         </item>
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,1,0">
+       <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0">
         <item>
          <widget class="ElaText" name="label_stopbit">
           <property name="text">
            <string>stopBit</string>
           </property>
          </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_5">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
         </item>
         <item>
          <widget class="ElaLineEdit" name="lineEdit_stop_bit"/>
@@ -181,26 +116,13 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,1,0">
+       <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,0">
         <item>
          <widget class="ElaText" name="label_net_port">
           <property name="text">
            <string>NetPort</string>
           </property>
          </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_6">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
         </item>
         <item>
          <widget class="ElaLineEdit" name="lineEdit_net_port"/>

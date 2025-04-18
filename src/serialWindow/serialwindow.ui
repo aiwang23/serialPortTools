@@ -13,277 +13,8 @@
   <property name="windowTitle">
    <string>serialwindow</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout" columnstretch="1,0">
-   <item row="1" column="0" rowspan="3">
-    <widget class="QSplitter" name="splitter_data">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <widget class="outTextEdit" name="plainTextEdit_out"/>
-     <widget class="QWidget" name="layoutWidget">
-      <layout class="QVBoxLayout" name="verticalLayout_4">
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <item>
-          <widget class="ElaPlainTextEdit" name="plainTextEdit_in"/>
-         </item>
-         <item>
-          <widget class="ElaPushButton" name="pushButton_send">
-           <property name="text">
-            <string>send</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="cmdWidget" name="cmdwidget" native="true"/>
-       </item>
-      </layout>
-     </widget>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QGroupBox" name="groupBox_port">
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_10">
-        <item>
-         <widget class="ElaText" name="label_url">
-          <property name="layoutDirection">
-           <enum>Qt::LeftToRight</enum>
-          </property>
-          <property name="text">
-           <string>remote</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="ElaToggleSwitch" name="toggleswitch_url" native="true"/>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_0">
-        <item>
-         <widget class="ElaText" name="label_port">
-          <property name="text">
-           <string>serialPort</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="ElaComboBox" name="comboBox_port"/>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_1">
-        <item>
-         <widget class="ElaText" name="label_baud">
-          <property name="text">
-           <string>baudRate</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="ElaComboBox" name="comboBox_baud"/>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="ElaText" name="label_databit">
-          <property name="text">
-           <string>dataBit</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="ElaComboBox" name="comboBox_databit"/>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <item>
-         <widget class="ElaText" name="label_parity">
-          <property name="text">
-           <string>parity</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="ElaComboBox" name="comboBox_parity"/>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_4">
-        <item>
-         <widget class="ElaText" name="label_stopbit">
-          <property name="text">
-           <string>stopBit</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="ElaComboBox" name="comboBox_stopbit"/>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="ElaToggleButton" name="toggleswitch_open" native="true"/>
-      </item>
-      <item>
-       <spacer name="verticalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="2" column="1">
-    <widget class="QGroupBox" name="groupBox_recv">
-     <property name="title">
-      <string/>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_5">
-        <item>
-         <widget class="ElaText" name="label_show_type">
-          <property name="text">
-           <string>showType</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="ElaComboBox" name="comboBox_show_type"/>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_6">
-        <item>
-         <widget class="ElaPushButton" name="pushButton_save_file">
-          <property name="text">
-           <string>save</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="ElaPushButton" name="pushButton_clear">
-          <property name="text">
-           <string>clear</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <spacer name="verticalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="3" column="1">
-    <widget class="QGroupBox" name="groupBox_send">
-     <property name="title">
-      <string/>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_3">
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_7">
-        <item>
-         <widget class="ElaText" name="label_send_type">
-          <property name="text">
-           <string>sendType</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="ElaComboBox" name="comboBox_send_type"/>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_8">
-        <item>
-         <widget class="ElaText" name="label_send_mode">
-          <property name="text">
-           <string>sendMode</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="ElaComboBox" name="comboBox_send_mode"/>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_9">
-        <item>
-         <widget class="ElaText" name="label_auto_mode_cycle">
-          <property name="text">
-           <string>cycle</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="ElaLineEdit" name="lineEdit_auto_mode"/>
-        </item>
-        <item>
-         <widget class="ElaPushButton" name="pushButton_auto_mode_sec">
-          <property name="text">
-           <string>S</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="ElaToggleSwitch" name="toggleswitch_auto_mode" native="true"/>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="0" column="0" colspan="2">
+  <layout class="QVBoxLayout" name="verticalLayout_5">
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_top" stretch="0,1,0">
      <item>
       <spacer name="horizontalSpacer">
@@ -315,6 +46,291 @@
       </spacer>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QSplitter" name="splitter_main">
+     <property name="styleSheet">
+      <string notr="true">#splitter_main::handle {
+    background: transparent;
+    width: 1px;  /* 水平分割条 */
+    height: 1px; /* 垂直分割条 */
+}</string>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <widget class="QSplitter" name="splitter_data">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <widget class="outTextEdit" name="plainTextEdit_out"/>
+      <widget class="QWidget" name="layoutWidget">
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="ElaPlainTextEdit" name="plainTextEdit_in"/>
+          </item>
+          <item>
+           <widget class="ElaPushButton" name="pushButton_send">
+            <property name="text">
+             <string>send</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="cmdWidget" name="cmdwidget" native="true"/>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="layoutWidget">
+      <layout class="QVBoxLayout" name="verticalLayout_right">
+       <item>
+        <widget class="QGroupBox" name="groupBox_port">
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_10">
+            <item>
+             <widget class="ElaText" name="label_url">
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="text">
+               <string>remote</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="ElaToggleSwitch" name="toggleswitch_url" native="true"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_0">
+            <item>
+             <widget class="ElaText" name="label_port">
+              <property name="text">
+               <string>serialPort</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="ElaComboBox" name="comboBox_port"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_1">
+            <item>
+             <widget class="ElaText" name="label_baud">
+              <property name="text">
+               <string>baudRate</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="ElaComboBox" name="comboBox_baud"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="ElaText" name="label_databit">
+              <property name="text">
+               <string>dataBit</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="ElaComboBox" name="comboBox_databit"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="ElaText" name="label_parity">
+              <property name="text">
+               <string>parity</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="ElaComboBox" name="comboBox_parity"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <widget class="ElaText" name="label_stopbit">
+              <property name="text">
+               <string>stopBit</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="ElaComboBox" name="comboBox_stopbit"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="ElaToggleButton" name="toggleswitch_open" native="true"/>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_recv">
+         <property name="title">
+          <string/>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <item>
+             <widget class="ElaText" name="label_show_type">
+              <property name="text">
+               <string>showType</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="ElaComboBox" name="comboBox_show_type"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_6">
+            <item>
+             <widget class="ElaPushButton" name="pushButton_save_file">
+              <property name="text">
+               <string>save</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="ElaPushButton" name="pushButton_clear">
+              <property name="text">
+               <string>clear</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_send">
+         <property name="title">
+          <string/>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_7">
+            <item>
+             <widget class="ElaText" name="label_send_type">
+              <property name="text">
+               <string>sendType</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="ElaComboBox" name="comboBox_send_type"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_8">
+            <item>
+             <widget class="ElaText" name="label_send_mode">
+              <property name="text">
+               <string>sendMode</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="ElaComboBox" name="comboBox_send_mode"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_9">
+            <item>
+             <widget class="ElaText" name="label_auto_mode_cycle">
+              <property name="text">
+               <string>cycle</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="ElaLineEdit" name="lineEdit_auto_mode"/>
+            </item>
+            <item>
+             <widget class="ElaPushButton" name="pushButton_auto_mode_sec">
+              <property name="text">
+               <string>S</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="ElaToggleSwitch" name="toggleswitch_auto_mode" native="true"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
    </item>
   </layout>
  </widget>
