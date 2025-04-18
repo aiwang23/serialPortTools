@@ -9,6 +9,8 @@
 #include <qcoreevent.h>
 #include <QWidget>
 
+#include "nlohmann/json.hpp"
+
 
 enum class defaultNewWindowType;
 class ElaMenu;
@@ -34,6 +36,8 @@ public:
     void initSignalSlots();
 
     void initButton();
+
+    void initSettings();
 
 protected:
     void resizeEvent(QResizeEvent *event) override;

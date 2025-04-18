@@ -10,7 +10,6 @@
 
 #include "ui_mainWindow.h"
 #include <ElaIconButton.h>
-#include <ElaContentDialog.h>
 #include <ElaMessageBar.h>
 #include <ElaTheme.h>
 #include <qevent.h>
@@ -22,8 +21,10 @@
 #include "settingswindow.h"
 #include <QTranslator>
 #include <ElaToolButton.h>
+#include <fstream>
 
 #include "serialserver.h"
+#include "settings.h"
 
 static bool isSystemDarkTheme() {
     // 1. 先检查调色板（通用方法）
@@ -48,18 +49,8 @@ static bool isSystemDarkTheme() {
 
 mainWindow::mainWindow(QWidget *parent) : ElaWidget(parent), ui(new Ui::mainWindow),
                                           default_new_window_(defaultNewWindowType::serialWindow) {
-    // 获取系统语言
-    QString systemLang = QLocale::system().name(); // 例如: "zh_CN", "en_US"
-    // 尝试加载对应的.qm文件
-    translator_ = new QTranslator{this};
-    if (translator_->load(":/res/translations/" + systemLang + ".qm")) {
-        QCoreApplication::installTranslator(translator_);
-    } else {
-        // 加载失败，使用默认语言(如英语)
-        if (translator_->load(":/res/translations/en_US.qm")) {
-            QCoreApplication::installTranslator(translator_);
-        }
-    }
+    // 初始化设置
+    initSettings();
 
     ui->setupUi(this);
 
@@ -169,9 +160,38 @@ void mainWindow::initButton() {
         connect(w, &settingsWindow::sigDefaultNewWindowChanged, this, [this](const defaultNewWindowType &type) {
             default_new_window_ = type;
         });
+
+        w->settingsUpdate(settings::instance().get());
     });
 
     more_tools_button_->setMenu(more_menu_);
+}
+
+void mainWindow::initSettings() {
+    std::ifstream ifstream{"settings.json"};
+    nlohmann::json json;
+    try {
+        json = nlohmann::json::parse(ifstream);
+    } catch (...) {
+        json = settings::defaultSettings();
+        // 例如: "zh_CN", "en_US"
+        json["language"] = QLocale::system().name().toStdString();
+    }
+    ifstream.close();
+
+    QString lang = QString::fromStdString(json["language"].get<std::string>());
+    // 尝试加载对应的.qm文件
+    translator_ = new QTranslator{this};
+    if (translator_->load(":/res/translations/" + lang + ".qm")) {
+        QCoreApplication::installTranslator(translator_);
+    } else {
+        // 加载失败，使用默认语言(如英语)
+        if (translator_->load(":/res/translations/en_US.qm")) {
+            QCoreApplication::installTranslator(translator_);
+            json["language"] = "en_US";
+        }
+    }
+    settings::instance().set(json);
 }
 
 void mainWindow::resizeEvent(QResizeEvent *event) {
@@ -213,16 +233,23 @@ void mainWindow::changeEvent(QEvent *event) {
 
 
 void mainWindow::newWindow() {
-    inputDialog dialog{QString(tr("new window"))};
+    QString info;
+    if (defaultNewWindowType::serialWindow == default_new_window_) {
+        info = tr("new serial window");
+    } else if (defaultNewWindowType::serialServer == default_new_window_) {
+        info = tr("new serial server");
+    }
+    inputDialog dialog{info};
 
     dialog.exec();
     QString text = dialog.getInputText();
     if (not text.isEmpty()) {
         QWidget *w = nullptr;
-        if (defaultNewWindowType::serialWindow == default_new_window_)
+        if (defaultNewWindowType::serialWindow == default_new_window_) {
             w = new serialWindow;
-        else if (defaultNewWindowType::serialServer == default_new_window_)
+        } else if (defaultNewWindowType::serialServer == default_new_window_) {
             w = new serialServer;
+        }
 
         int idx = ui->tabWidget->addTab(w, text);
         ui->tabWidget->setCurrentIndex(idx);

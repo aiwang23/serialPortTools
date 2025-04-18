@@ -8,6 +8,8 @@
 #include <QWidget>
 #include <ElaScrollPage.h>
 
+#include "nlohmann/json.hpp"
+
 QT_BEGIN_NAMESPACE
 
 enum class defaultNewWindowType { serialWindow, serialServer };
@@ -38,10 +40,16 @@ Q_SIGNALS:
 
     Q_SIGNAL void sigDefaultNewWindowChanged(defaultNewWindowType type);
 
+public Q_SLOTS:
+    void settingsUpdate(nlohmann::json json);
+
 private:
     Ui::settingsWindow *ui;
 
     std::unordered_map<QString, defaultNewWindowType> defaultNewWindowMap_;
+
+    QString oldLangText;
+    QString oldDefaultNewWindowText;
 };
 
 

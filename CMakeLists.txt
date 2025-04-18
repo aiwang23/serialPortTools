@@ -65,6 +65,8 @@ add_executable(serialPortTools WIN32
         src/serialServer/serialserver.h
         src/serialServer/serialserver.ui
         src/serialServer/tcpServer.h
+        src/settings.cpp
+        src/settings.h
 )
 
 # 添加资源文件

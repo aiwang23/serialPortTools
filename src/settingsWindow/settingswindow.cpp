@@ -5,6 +5,8 @@
 // You may need to build the project (run Qt uic code generator) to get "ui_settingsWindow.h" resolved
 
 #include "settingswindow.h"
+
+#include "settings.h"
 #include "ui_settingsWindow.h"
 
 
@@ -53,21 +55,38 @@ void settingsWindow::initComboBox() {
     );
 
     defaultNewWindowMap_ = {
-        {"serial window", defaultNewWindowType::serialServer},
+        {"serial window", defaultNewWindowType::serialWindow},
         {"serial server", defaultNewWindowType::serialServer}
     };
 }
 
 void settingsWindow::initSignalSlots() {
-    connect(ui->comboBox_language, &ElaComboBox::currentTextChanged, this, [this]() {
-        QString text = ui->comboBox_language->currentText();
-        emit sigLanguageChanged(text);
+    connect(ui->comboBox_language, &ElaComboBox::currentTextChanged, this, [this](QString currentText) {
+        if (currentText == oldLangText) {
+            return;
+        }
+        emit sigLanguageChanged(currentText);
+
+        nlohmann::json json;
+        json["language"] = currentText.toStdString();
+        settings::instance().set(json);
+        oldLangText = currentText;
     });
-    connect(ui->comboBox_default_new_window, &ElaComboBox::currentTextChanged, this, [this]() {
-        QString text = ui->comboBox_default_new_window->currentText();
-        auto rs = defaultNewWindowMap_.at(text);
+
+    connect(ui->comboBox_default_new_window, &ElaComboBox::currentTextChanged, this, [this](QString currentText) {
+        if (currentText == oldDefaultNewWindowText) {
+            return;
+        }
+        auto rs = defaultNewWindowMap_.at(currentText);
         emit sigDefaultNewWindowChanged(rs);
+
+        nlohmann::json json;
+        json["defaultNewWindow"] = currentText.toStdString();
+        settings::instance().set(json);
+        oldDefaultNewWindowText = currentText;
     });
+
+    connect(&settings::instance(), &settings::sigSettingsUpdated, this, &settingsWindow::settingsUpdate);
 }
 
 void settingsWindow::changeEvent(QEvent *event) {
@@ -82,4 +101,19 @@ void settingsWindow::changeEvent(QEvent *event) {
         }
     }
     QWidget::changeEvent(event);
+}
+
+void settingsWindow::settingsUpdate(nlohmann::json json) {
+    for (auto &[key, val]: json.items()) {
+        if (key == "language") {
+            QString text = QString::fromStdString(val.get<std::string>());
+            ui->comboBox_language->setCurrentText(text);
+            emit sigLanguageChanged(text);
+        } else if (key == "defaultNewWindow") {
+            QString text = QString::fromStdString(val.get<std::string>());
+            ui->comboBox_default_new_window->setCurrentText(text);
+            const defaultNewWindowType rs = defaultNewWindowMap_.at(text);
+            emit sigDefaultNewWindowChanged(rs);
+        }
+    }
 }
