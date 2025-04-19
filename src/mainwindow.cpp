@@ -168,30 +168,96 @@ void mainWindow::initButton() {
 }
 
 void mainWindow::initSettings() {
-    std::ifstream ifstream{"settings.json"};
-    nlohmann::json json;
-    try {
-        json = nlohmann::json::parse(ifstream);
-    } catch (...) {
-        json = settings::defaultSettings();
-        // 例如: "zh_CN", "en_US"
-        json["language"] = QLocale::system().name().toStdString();
-    }
-    ifstream.close();
+    const char* fileName = "settings.json";
 
-    QString lang = QString::fromStdString(json["language"].get<std::string>());
-    // 尝试加载对应的.qm文件
-    translator_ = new QTranslator{this};
-    if (translator_->load(":/res/translations/" + lang + ".qm")) {
-        QCoreApplication::installTranslator(translator_);
-    } else {
-        // 加载失败，使用默认语言(如英语)
-        if (translator_->load(":/res/translations/en_US.qm")) {
-            QCoreApplication::installTranslator(translator_);
-            json["language"] = "en_US";
+    // 创建默认设置文件（如果不存在）
+    if (not std::filesystem::exists(fileName)) {
+        try {
+            std::ofstream ofs(fileName);
+            if (!ofs.is_open()) {
+                qWarning() << "Failed to create settings file:" << fileName;
+                settings::instance().set(settings::defaultSettings());
+                return;
+            }
+            ofs << settings::defaultSettings().dump(4);  // 使用缩进美化输出
+            ofs.close();
+        } catch (const std::exception& e) {
+            qCritical() << "Error creating settings file:" << e.what();
+            settings::instance().set(settings::defaultSettings());
+            return;
         }
     }
-    settings::instance().set(json);
+
+    // 读取设置文件
+    nlohmann::json json;
+    try {
+        std::ifstream ifs(fileName);
+        if (not ifs.is_open()) {
+            throw std::runtime_error("Failed to open settings file");
+        }
+
+        json = nlohmann::json::parse(ifs);
+        ifs.close();
+    } catch (const std::exception& e) {
+        qWarning() << "Error parsing settings file:" << e.what() << "- Using default settings";
+        json = settings::defaultSettings();
+        // 设置系统默认语言
+        json["language"] = QLocale::system().name().toStdString();
+    }
+
+    // 处理语言设置
+    QString lang;
+    try {
+        lang = QString::fromStdString(json.at("language").get<std::string>());
+    } catch (const std::exception& e) {
+        qWarning() << "Invalid language setting:" << e.what() << "- Using system default";
+        lang = QLocale::system().name();
+        json["language"] = lang.toStdString();
+    }
+
+    // 加载翻译文件
+    translator_ = new QTranslator(this);
+    bool translationLoaded = false;
+
+    // 尝试加载用户设置的语言
+    if (!lang.isEmpty()) {
+        QString translationPath = ":/res/translations/" + lang + ".qm";
+        if (translator_->load(translationPath)) {
+            if (QCoreApplication::installTranslator(translator_)) {
+                translationLoaded = true;
+            } else {
+                qWarning() << "Failed to install translator for language:" << lang;
+            }
+        }
+    }
+
+    // 如果首选语言加载失败，尝试加载英语
+    if (!translationLoaded) {
+        if (translator_->load(":/res/translations/en_US.qm")) {
+            if (QCoreApplication::installTranslator(translator_)) {
+                json["language"] = "en_US";  // 更新设置
+                qInfo() << "Falling back to English translation";
+            } else {
+                qWarning() << "Failed to install English translator";
+            }
+        } else {
+            qWarning() << "Could not load any translation files";
+        }
+    }
+
+    // 保存最终设置
+    try {
+        settings::instance().set(json);
+
+        // 如果设置文件损坏或被重置，重新保存
+        std::ofstream ofs(fileName);
+        if (ofs.is_open()) {
+            ofs << json.dump(4);
+            ofs.close();
+        }
+    } catch (const std::exception& e) {
+        qCritical() << "Error saving settings:" << e.what();
+    }
 }
 
 void mainWindow::resizeEvent(QResizeEvent *event) {
