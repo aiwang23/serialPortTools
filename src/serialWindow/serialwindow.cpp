@@ -8,25 +8,25 @@
 
 #include <ElaIconButton.h>
 
-#include "../../cmake-build-debug/serialPortTools_autogen/include/ui_serialwindow.h"
+#include "ui_serialwindow.h"
 #include <ElaTheme.h>
 #include <QSettings>
 #include <ElaMessageBar.h>
 #include <sstream>
 #include <CSerialPort/SerialPortInfo.h>
-#include <../inc/maddy/parser.h>
+#include <maddy/parser.h>
 #include <QTimer>
 #include <bitset>
 #include <QBitArray>
 #include <ElaToggleButton.h>
 #include <QFileDialog>
 #include <utility>
-#include "../inc/threadPool.h"
+#include "threadPool.h"
 #include <QPropertyAnimation>
 #include <QTcpSocket>
 
 #include "serialserver.h"
-#include "../inc/nlohmann/json.hpp"
+#include "nlohmann/json.hpp"
 
 using itas109::CSerialPortInfo;
 using itas109::SerialPortInfo;
