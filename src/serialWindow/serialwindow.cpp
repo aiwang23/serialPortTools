@@ -506,6 +506,10 @@ void serialWindow::openOrCloseSerialPort(bool checked) {
             // 本地关闭
             serial_port_.close();
         }
+        if (sendMode::AUTO == send_mode_) {
+            ui->toggleswitch_auto_mode->setIsToggled(false);
+        }
+
         ui->toggleswitch_open->setText(tr("open"));
         ui->comboBox_baud->setEnabled(true);
         ui->comboBox_databit->setEnabled(true);

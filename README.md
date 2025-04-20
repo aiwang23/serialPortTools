@@ -61,16 +61,15 @@
 - [ThreadPool](https://github.com/progschj/ThreadPool) Latest
 - [nlohmann::json](https://github.com/nlohmann/json) v3.11.3
 
+## 拉取该项目,并加载子模块
+```shell
+git clone --recursive https://github.com/aiwang23/serialPortTools.git
+```
+
 ## 编译
 
-> 编译编译本项目之前 先编译以下的库
-> - [ElaWidgetTools](https://github.com/Liniyous/ElaWidgetTools)
-> - [CSerialPort](https://github.com/itas109/CSerialPort)
-
-> 请把[CMakeLists.txt](CMakeLists.txt)的下述变量 修改自己电脑的第三方库安装路径
+> 请把[CMakeLists.txt](CMakeLists.txt)的下述变量 修改自己电脑的Qt安装路径
 > - CMAKE_PREFIX_PATH
-> - ELA_LIB_PATH
-> - C_SERIAL_PORT_LIB_PATH
 
 ### Windows10+
 
