@@ -1,0 +1,6 @@
+[submodule "3rd/ElaWidgetTools"]
+	path = 3rd/ElaWidgetTools
+	url = https://github.com/Liniyous/ElaWidgetTools
+[submodule "3rd/CSerialPort"]
+	path = 3rd/CSerialPort
+	url = https://github.com/itas109/CSerialPort

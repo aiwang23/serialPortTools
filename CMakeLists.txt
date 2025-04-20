@@ -8,16 +8,12 @@ set(CMAKE_AUTOUIC ON)
 
 #! 请把这里修改成你的 Qt 路径
 set(CMAKE_PREFIX_PATH "C:/Soft/Qt/6.4.3/msvc2019_64/lib/cmake")
-#! 请把这里修改成你的 ElaWidgetTools 路径
-set(ELA_LIB_PATH "C:\\Soft\\ElaWidgetTools\\ElaWidgetTools")
-#! 请把这里修改成你的 CSerialPort 路径
-set(C_SERIAL_PORT_LIB_PATH "C:\\Soft\\CSerialPort")
 
-include_directories(${ELA_LIB_PATH}/include)
-link_directories(${ELA_LIB_PATH}/lib)
+# 子模块 ElaWidgetTools CSerialPort
+add_subdirectory(3rd/ElaWidgetTools)
+add_subdirectory(3rd/CSerialPort)
 
-include_directories(${C_SERIAL_PORT_LIB_PATH}/include)
-link_directories(${C_SERIAL_PORT_LIB_PATH}/lib)
+include_directories(3rd/CSerialPort/include)
 
 include_directories(${CMAKE_SOURCE_DIR}/src/inc)
 include_directories(${CMAKE_SOURCE_DIR}/src/serialWindow)
@@ -76,29 +72,15 @@ qt6_add_resources(serialPortTools "res/translations"
         resources.qrc
 )
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    message(STATUS "当前是Debug构建")
-    # 添加Debug特有的设置
-    target_link_libraries(serialPortTools
-            Qt::Core
-            Qt::Gui
-            Qt::Widgets
-            Qt6::Network
-            ElaWidgetToolsd.lib
-            libcserialportd.lib
-    )
-elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
-    message(STATUS "当前是Release构建")
-    # 添加Release特有的设置
-    target_link_libraries(serialPortTools
-            Qt::Core
-            Qt::Gui
-            Qt::Widgets
-            Qt6::Network
-            ElaWidgetTools.lib
-            libcserialport.lib
-    )
-endif ()
+target_link_libraries(serialPortTools
+        Qt::Core
+        Qt::Gui
+        Qt::Widgets
+        Qt6::Network
+
+        libcserialport
+        ElaWidgetTools
+)
 
 if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     set(DEBUG_SUFFIX)
