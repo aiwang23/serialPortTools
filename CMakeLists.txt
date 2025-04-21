@@ -32,34 +32,34 @@ find_package(Qt6 COMPONENTS
 
 add_executable(serialPortTools WIN32
         src/main.cpp
-        src/serialWindow/serialwindow.cpp
-        src/serialWindow/serialwindow.h
-        src/serialWindow/serialwindow.ui
-        src/mainwindow.cpp
-        src/mainwindow.h
-        src/mainwindow.ui
-        src/inputdialog.cpp
-        src/inputdialog.h
-        src/inputdialog.ui
-        src/settingsWindow/settingswindow.cpp
-        src/settingsWindow/settingswindow.h
-        src/settingsWindow/settingswindow.ui
+        src/serialWindow/serialWindow.cpp
+        src/serialWindow/serialWindow.h
+        src/serialWindow/serialWindow.ui
+        src/mainWindow.cpp
+        src/mainWindow.h
+        src/mainWindow.ui
+        src/inputDialog.cpp
+        src/inputDialog.h
+        src/inputDialog.ui
+        src/settingsWindow/settingsWindow.cpp
+        src/settingsWindow/settingsWindow.h
+        src/settingsWindow/settingsWindow.ui
         src/serialWindow/outTextEdit.cpp
         src/serialWindow/outTextEdit.h
         src/inc/threadPool.h
         src/inc/moodycamel/concurrentqueue.h
 
-        src/serialWindow/cmdwidget.cpp
-        src/serialWindow/cmdwidget.h
-        src/serialWindow/cmdwidget.ui
-        src/serialWindow/cmdlineedit.cpp
-        src/serialWindow/cmdlineedit.h
-        src/serialWindow/cmdlineedit.ui
+        src/serialWindow/cmdWidget.cpp
+        src/serialWindow/cmdWidget.h
+        src/serialWindow/cmdWidget.ui
+        src/serialWindow/cmdLineEdit.cpp
+        src/serialWindow/cmdLineEdit.h
+        src/serialWindow/cmdLineEdit.ui
 
         resources.qrc
-        src/serialServer/serialserver.cpp
-        src/serialServer/serialserver.h
-        src/serialServer/serialserver.ui
+        src/serialServer/serialServer.cpp
+        src/serialServer/serialServer.h
+        src/serialServer/serialServer.ui
         src/serialServer/tcpServer.h
         src/settings.cpp
         src/settings.h

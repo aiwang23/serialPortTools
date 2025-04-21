@@ -25,7 +25,7 @@
 #include <QPropertyAnimation>
 #include <QTcpSocket>
 
-#include "serialserver.h"
+#include "serialServer.h"
 #include "nlohmann/json.hpp"
 
 using itas109::CSerialPortInfo;

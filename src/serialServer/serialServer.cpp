@@ -1,6 +1,6 @@
 // serialServer.cpp
 
-#include "serialserver.h"
+#include "serialServer.h"
 
 #include <ElaMessageBar.h>
 #include <iostream>
