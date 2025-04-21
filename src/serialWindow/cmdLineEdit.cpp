@@ -4,7 +4,7 @@
 
 // You may need to build the project (run Qt uic code generator) to get "ui_cmdLineEdit.h" resolved
 
-#include "cmdlineedit.h"
+#include "cmdLineEdit.h"
 #include "ui_cmdLineEdit.h"
 #include <ElaIconButton.h>
 

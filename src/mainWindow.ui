@@ -35,7 +35,7 @@
   <customwidget>
    <class>serialWindow</class>
    <extends>QWidget</extends>
-   <header location="global">serialwindow.h</header>
+   <header location="global">serialWindow.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

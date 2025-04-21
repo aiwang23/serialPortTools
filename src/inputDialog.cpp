@@ -4,7 +4,7 @@
 
 // You may need to build the project (run Qt uic code generator) to get "ui_inputDialog.h" resolved
 
-#include "inputdialog.h"
+#include "inputDialog.h"
 #include "ui_inputDialog.h"
 #include <ElaMessageBar.h>
 #include <QFocusEvent>

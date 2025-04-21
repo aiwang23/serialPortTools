@@ -359,7 +359,7 @@
   <customwidget>
    <class>outTextEdit</class>
    <extends>QPlainTextEdit</extends>
-   <header location="global">outtextedit.h</header>
+   <header location="global">outTextEdit.h</header>
   </customwidget>
   <customwidget>
    <class>ElaText</class>
@@ -369,7 +369,7 @@
   <customwidget>
    <class>cmdWidget</class>
    <extends>QWidget</extends>
-   <header location="global">cmdwidget.h</header>
+   <header location="global">cmdWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

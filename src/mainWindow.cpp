@@ -4,7 +4,7 @@
 
 // You may need to build the project (run Qt uic code generator) to get "ui_tabWindow.h" resolved
 
-#include "mainwindow.h"
+#include "mainWindow.h"
 
 #include <qtabbar.h>
 
@@ -14,16 +14,16 @@
 #include <ElaTheme.h>
 #include <qevent.h>
 
-#include "inputdialog.h"
-#include <ELaMenu.h>
+#include "inputDialog.h"
+#include <ElaMenu.h>
 #include <QSettings>
 
-#include "settingswindow.h"
+#include "settingsWindow.h"
 #include <QTranslator>
 #include <ElaToolButton.h>
 #include <fstream>
 
-#include "serialserver.h"
+#include "serialServer.h"
 #include "settings.h"
 
 static bool isSystemDarkTheme() {

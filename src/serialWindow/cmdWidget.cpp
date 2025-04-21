@@ -4,12 +4,12 @@
 
 // You may need to build the project (run Qt uic code generator) to get "ui_cmdWidget.h" resolved
 
-#include "cmdwidget.h"
+#include "cmdWidget.h"
 
 #include <QFocusEvent>
 
 #include "ui_cmdWidget.h"
-#include "cmdlineedit.h"
+#include "cmdLineEdit.h"
 
 cmdWidget::cmdWidget(QWidget *parent) : QWidget(parent), ui(new Ui::cmdWidget) {
     ui->setupUi(this);

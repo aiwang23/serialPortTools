@@ -4,11 +4,11 @@
 
 // You may need to build the project (run Qt uic code generator) to get "ui_mainWindow.h" resolved
 
-#include "serialwindow.h"
+#include "serialWindow.h"
 
 #include <ElaIconButton.h>
 
-#include "ui_serialwindow.h"
+#include "ui_serialWindow.h"
 #include <ElaTheme.h>
 #include <QSettings>
 #include <ElaMessageBar.h>
@@ -25,7 +25,7 @@
 #include <QPropertyAnimation>
 #include <QTcpSocket>
 
-#include "serialserver.h"
+#include "serialServer.h"
 #include "nlohmann/json.hpp"
 
 using itas109::CSerialPortInfo;

@@ -4,7 +4,7 @@
 
 #include "outTextEdit.h"
 
-#include <ELaMenu.h>
+#include <ElaMenu.h>
 #include <QClipboard>
 #include <QGuiApplication>
 
