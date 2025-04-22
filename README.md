@@ -2,7 +2,6 @@
 
 ![GitHub License](https://img.shields.io/github/license/mashape/apistatus)
 
-
 ## 简介
 
 本项目是一个串口助手
@@ -19,7 +18,7 @@
 
 #### 整体布局
 
-![overall_interface.png](doc/serialServer_overall_interface.png)
+![overall_interface.png](doc/serialClient_overall_interface.png)
 
 #### 接收区设置
 
@@ -37,19 +36,20 @@
 
 #### 整体布局
 
-![Snipaste_2025-04-19_16-24-23.png](doc/Snipaste_2025-04-19_16-24-23.png)
+![Snipaste_2025-04-19_16-24-23.png](doc/serialServer_overall_interface.png)
 
 ## 支持平台
 
-| Windows      | Debian(***Todo***) |
-|--------------|--------------------|
-| ![win-badge] | ![ubuntu-badge]    |
+| Windows      | Debian          |
+|--------------|-----------------|
+| ![win-badge] | ![Debian-badge] |
 
-> 在Windows11上成功编译, **在Debian上待开发**
+> 在Windows11 和 Debian12 和 KUbuntu2404 上成功编译 <br>
+> Ubuntu 应该也可以, 还没试
 
 [win-badge]: https://img.shields.io/badge/Windows-Passing-61C263
 
-[ubuntu-badge]: https://img.shields.io/debian/v/apt
+[Debian-badge]: https://img.shields.io/debian/v/apt
 
 ## 使用的第三方库和对应的版本
 
@@ -62,6 +62,7 @@
 - [nlohmann::json](https://github.com/nlohmann/json) v3.11.3
 
 ## 拉取该项目,并加载子模块
+
 ```shell
 git clone --recursive https://github.com/aiwang23/serialPortTools.git
 ```
@@ -73,7 +74,8 @@ git clone --recursive https://github.com/aiwang23/serialPortTools.git
 
 ### Windows10+
 
-本项目编译器使用 msvc2022
+> windows 编译器使用 msvc2022
+> debian 编译器使用 gcc/g++
 
 ```shell
 cmake -S . -B ./build/
