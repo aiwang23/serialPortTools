@@ -15,10 +15,10 @@ elseif (UNIX AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(CMAKE_PREFIX_PATH "/home/wang/Qt/6.4.3/gcc_64/lib/cmake")
 endif()
 
-
-# 子模块 ElaWidgetTools CSerialPort
+# 子模块 ElaWidgetTools CSerialPort libssh2
 add_subdirectory(3rd/ElaWidgetTools)
 add_subdirectory(3rd/CSerialPort)
+add_subdirectory(3rd/libssh2)
 
 include_directories(3rd/CSerialPort/include)
 
@@ -70,6 +70,8 @@ add_executable(serialPortTools WIN32
         src/serialServer/tcpServer.h
         src/settings.cpp
         src/settings.h
+        src/sftpWindow/sftpClient.cpp
+        src/sftpWindow/sftpClient.h
 )
 
 # 添加资源文件
@@ -87,6 +89,7 @@ target_link_libraries(serialPortTools
 
         libcserialport
         ElaWidgetTools
+        libssh2_static
 )
 
 if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
