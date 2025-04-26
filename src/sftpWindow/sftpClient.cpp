@@ -19,12 +19,6 @@ sftpClient::sftpClient(QObject *parent) {
     // 创建TCP socket对象
     m_tcpSocket = new QTcpSocket(this);
 
-    // 连接socket状态信号
-    connect(m_tcpSocket, &QTcpSocket::connected, [this]() {
-        m_connected = true;
-        emit connected();
-    });
-
     connect(m_tcpSocket, &QTcpSocket::disconnected, [this]() {
         m_connected = false;
         emit disconnected();
@@ -136,8 +130,8 @@ bool sftpClient::connectToHost(const QString &host, quint16 port, const QString 
         return false;
     }
 
-    userName_ = username;
     m_connected = true;
+    emit connected();
     return true;
 }
 
@@ -161,7 +155,6 @@ void sftpClient::disconnectFromHost() {
         }
     }
 
-    userName_.clear();
     m_connected = false;
 }
 
@@ -519,12 +512,13 @@ bool sftpClient::rmAuto(const QString &path) {
 
 QList<sftpClient::fileInfo> sftpClient::ls(const QString &path, const QList<listArg> &args) {
     QList<fileInfo> fileList;
+    fileList.reserve(20);
     LIBSSH2_SFTP_HANDLE *dirHandle = nullptr;
 
     if (!m_connected || !m_sftpSession) {
         m_lastError = tr("Not connected to SFTP server");
         emit errorOccurred(m_lastError);
-        return fileList;
+        return std::move(fileList);
     }
 
     QByteArray pathBytes = path.toUtf8();
@@ -548,7 +542,7 @@ QList<sftpClient::fileInfo> sftpClient::ls(const QString &path, const QList<list
                 m_lastError = tr("Failed to open directory: ") + QString::fromLocal8Bit(errmsg);
         }
         emit errorOccurred(m_lastError);
-        return fileList;
+        return std::move(fileList);
     }
 
     bool showAll = args.contains(listArg::all);
@@ -633,7 +627,7 @@ QList<sftpClient::fileInfo> sftpClient::ls(const QString &path, const QList<list
     }
 
     libssh2_sftp_closedir(dirHandle);
-    return fileList;
+    return std::move(fileList);
 }
 
 bool sftpClient::rename(const QString &oldName, const QString &newName) {
@@ -844,6 +838,48 @@ QString sftpClient::home() {
             .replace("//", "/");
 
     return homePath.isEmpty() ? "/" : homePath; // 默认回退根目录
+}
+
+void sftpClient::exist(const QString &path, fileType &type) {
+    // 检查连接状态
+    if (!m_connected || !m_sftpSession) {
+        m_lastError = tr("Not connected to SFTP server");
+        type = fileType::none;
+        return;
+    }
+
+    QByteArray pathBytes = path.toUtf8();
+    const char *sftpPath = pathBytes.constData();
+    LIBSSH2_SFTP_ATTRIBUTES attrs;
+
+    // 使用 lstat 检查路径元数据（不跟随符号链接）
+    int rc = libssh2_sftp_lstat(m_sftpSession, sftpPath, &attrs);
+    if (rc == 0) {
+        type = LIBSSH2_SFTP_S_ISDIR(attrs.permissions)
+                   ? fileType::dir
+                   : LIBSSH2_SFTP_S_ISLNK(attrs.permissions)
+                         ? fileType::link
+                         : fileType::file;
+        return; // 路径存在（文件/目录/符号链接）
+    }
+    type = fileType::none;
+
+    // 获取具体错误码
+    int sftpError = libssh2_sftp_last_error(m_sftpSession);
+
+    // 处理不存在的情况
+    if (sftpError == LIBSSH2_FX_NO_SUCH_FILE) {
+        return;
+    }
+
+    // 其他错误处理
+    char *errmsg = nullptr;
+    libssh2_session_last_error(m_session, &errmsg, nullptr, 0);
+
+    // 将错误信息格式化为可读字符串
+    m_lastError = tr("SFTP error [%1]: %2")
+            .arg(sftpError)
+            .arg(QString::fromLocal8Bit(errmsg));
 }
 
 QString sftpClient::userNameFromUid(uint uid) {

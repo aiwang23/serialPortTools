@@ -29,6 +29,8 @@ public:
 
     enum class listArg { none = -1, all, list };
 
+    enum class fileType { none = -1, file, link, dir };
+
 public:
     explicit sftpClient(QObject *parent = nullptr);
 
@@ -77,6 +79,9 @@ public:
     // 获取当前用户的home目录
     QString home();
 
+    // 查看该目录是否存在 是否有效
+    void exist(const QString &path, fileType &type);
+
 private:
     QString userNameFromUid(uint uid);
 
@@ -98,7 +103,6 @@ private:
     // libssh2资源
     LIBSSH2_SESSION *m_session = nullptr;
     LIBSSH2_SFTP *m_sftpSession = nullptr;
-    QString userName_;
 
     // 网络连接
     QTcpSocket *m_tcpSocket = nullptr;
