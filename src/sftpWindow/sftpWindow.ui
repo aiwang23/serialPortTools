@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>sftpWindow</class>
+ <widget class="QWidget" name="sftpWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>sftpWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">#sftpWindow{background-color:transparent;border:0px;}</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_top">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_top_left_btn"/>
+     </item>
+     <item>
+      <widget class="ElaLineEdit" name="lineEdit_url"/>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_top_right_btn"/>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0">
+    <widget class="ElaTableView" name="tableWidget_list"/>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ElaLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header location="global">ElaLineEdit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ElaTableView</class>
+   <extends>QTableWidget</extends>
+   <header location="global">ElaTableView.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

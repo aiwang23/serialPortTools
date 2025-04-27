@@ -93,8 +93,11 @@ signals:
 
     void disconnected();
 
-    // 传输进度信号 (需要手动在实现中触发)
-    void transferProgress(qint64 bytesSent, qint64 bytesTotal);
+    // 下载 传输进度信号
+    void getTransferProgress(qint64 bytesSent, qint64 bytesTotal);
+
+    // 上传 传输进度信号
+    void putTransferProgress(qint64 bytesSent, qint64 bytesTotal);
 
     // 错误信号
     void errorOccurred(const QString &errorString);

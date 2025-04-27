@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>loginDialog</class>
+ <widget class="QWidget" name="loginDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>361</width>
+    <height>382</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>loginDialog</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_ip" stretch="1,4">
+     <item>
+      <widget class="ElaText" name="label_ip">
+       <property name="text">
+        <string>IP </string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ElaLineEdit" name="lineEdit_ip"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_port" stretch="1,4">
+     <item>
+      <widget class="ElaText" name="label_port">
+       <property name="text">
+        <string>port</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ElaLineEdit" name="lineEdit_port"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_user" stretch="1,4">
+     <item>
+      <widget class="ElaText" name="label_user">
+       <property name="text">
+        <string>user </string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ElaLineEdit" name="lineEdit_user"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_connection" stretch="1,4">
+     <item>
+      <widget class="ElaText" name="label_connection">
+       <property name="text">
+        <string>Connection</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ElaComboBox" name="comboBox_connection"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_password" stretch="1,4">
+     <item>
+      <widget class="ElaText" name="label_password">
+       <property name="text">
+        <string>password</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ElaLineEdit" name="lineEdit_password"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_pubkey" stretch="1,3">
+     <item>
+      <widget class="ElaText" name="label_pubkey">
+       <property name="text">
+        <string>pubkey</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ElaLineEdit" name="lineEdit_pubkey"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_prikey" stretch="1,3">
+     <item>
+      <widget class="ElaText" name="label_prikey">
+       <property name="text">
+        <string>prikey</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ElaLineEdit" name="lineEdit_prikey"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="ElaPushButton" name="pushButton_start">
+     <property name="text">
+      <string>start</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ElaText</class>
+   <extends>QLabel</extends>
+   <header location="global">ElaText.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ElaLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header location="global">ElaLineEdit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ElaComboBox</class>
+   <extends>QComboBox</extends>
+   <header location="global">ElaComboBox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ElaPushButton</class>
+   <extends>QPushButton</extends>
+   <header location="global">ElaPushButton.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

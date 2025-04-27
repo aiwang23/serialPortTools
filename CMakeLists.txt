@@ -72,6 +72,15 @@ add_executable(serialPortTools WIN32
         src/settings.h
         src/sftpWindow/sftpClient.cpp
         src/sftpWindow/sftpClient.h
+        src/sftpWindow/sftpWindow.cpp
+        src/sftpWindow/sftpWindow.h
+        src/sftpWindow/sftpWindow.ui
+        src/sftpWindow/loginDialog.cpp
+        src/sftpWindow/loginDialog.h
+        src/sftpWindow/loginDialog.ui
+        src/sftpWindow/sftpClientThread.cpp
+        src/sftpWindow/sftpClientThread.h
+        src/sftpWindow/sftpClientResponse.h
 )
 
 # 添加资源文件

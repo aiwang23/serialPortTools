@@ -229,7 +229,7 @@ bool sftpClient::put(const QString &localPath, const QString &remotePath) {
 
         // 更新进度
         bytesSent += bytesRead;
-        emit transferProgress(bytesSent, totalBytes);
+        emit putTransferProgress(bytesSent, totalBytes);
         fprintf(stdout, "%lld\n", bytesSent / totalBytes);
     }
 
@@ -319,7 +319,7 @@ bool sftpClient::get(const QString &remotePath, const QString &localPath) {
 
         // 更新进度
         bytesReceived += bytesWritten;
-        emit transferProgress(bytesReceived, totalBytes);
+        emit getTransferProgress(bytesReceived, totalBytes);
     }
 
     // 强制刷新写入缓存
@@ -776,7 +776,7 @@ bool sftpClient::cp(const QString &src, const QString &dst) {
 
         // 更新进度
         bytesCopied += bytesRead;
-        emit transferProgress(bytesCopied, totalBytes);
+        emit getTransferProgress(bytesCopied, totalBytes);
     }
 
     // 5. 最终校验
