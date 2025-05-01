@@ -114,6 +114,9 @@ void sftpWindow::initUI() {
     // 关联模型与视图
     ui->tableWidget_list->setModel(model);
     ui->tableWidget_list->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->tableWidget_list->horizontalHeader()->setDefaultAlignment(Qt::AlignmentFlag::AlignLeft);
+    ui->tableWidget_list->setColumnWidth(0, 200);
+    ui->tableWidget_list->setColumnWidth(5, 200);
 }
 
 void sftpWindow::initSignalSlots() {
@@ -224,28 +227,41 @@ void sftpWindow::initSignalSlots() {
         }, static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::SingleShotConnection));
     });
 
-    connect(this, &sftpWindow::mouseLeftEntered, this, [this](QPoint point) {
-        QModelIndex idx = ui->tableWidget_list->indexAt(point);
-        auto model = static_cast<QStandardItemModel *>(ui->tableWidget_list->model());
-        QString name = model->item(idx.row(), 0)->text();
-
-        ElaMenu menu{this};
-        menu.exec();
+    // 下载 上传进度
+    connect(icon_btn_trans_, &ElaIconButton::clicked, this, [this]() {
     });
 }
 
 void sftpWindow::initMenu() {
     ui->tableWidget_list->setContextMenuPolicy(Qt::CustomContextMenu);
     menu_ = new ElaMenu{ui->tableWidget_list};
+    menu_->setFixedWidth(120);
+    openAction_ = menu_->addElaIconAction(ElaIconType::FolderOpen, tr("open"));
+    menu_->addSeparator();
     getAction_ = menu_->addElaIconAction(ElaIconType::ArrowDownToBracket, tr("get"));
     putAction_ = menu_->addElaIconAction(ElaIconType::ArrowUpFromBracket, tr("put"));
+    menu_->addSeparator();
+    copyAction_ = menu_->addElaIconAction(ElaIconType::Copy, tr("copy"));
+    moveAction_ = menu_->addElaIconAction(ElaIconType::Copy, tr("move"));
+    renameAction_ = menu_->addElaIconAction(ElaIconType::PenLine, tr("rename"));
+    deleteAction_ = menu_->addElaIconAction(ElaIconType::TrashCan, tr("delete"));
 
+    // 打开文件或 打开文件夹
+    connect(openAction_, &QAction::triggered, this, &sftpWindow::doOpen);
     // 下载
     connect(getAction_, &QAction::triggered, this, &sftpWindow::doGet);
-
     // 上传
     connect(putAction_, &QAction::triggered, this, &sftpWindow::doPut);
+    // 复制
+    connect(copyAction_, &QAction::triggered, this, &sftpWindow::doCopy);
+    // 移动
+    connect(moveAction_, &QAction::triggered, this, &sftpWindow::doMove);
+    // 重命名
+    connect(renameAction_, &QAction::triggered, this, &sftpWindow::doRename);
+    // 删除
+    connect(deleteAction_, &QAction::triggered, this, &sftpWindow::doDelete);
 
+    // 右键弹出菜单
     connect(ui->tableWidget_list, &ElaTableView::customContextMenuRequested, this, [this](QPoint point) {
         auto index = ui->tableWidget_list->indexAt(point);
         if (not index.isValid()) {
@@ -255,45 +271,52 @@ void sftpWindow::initMenu() {
     });
 }
 
-void sftpWindow::appendLine(const QTableView *table, const QStringList &line) {
-    if (!table || line.isEmpty()) return; // 添加空检查
-
-    QStandardItemModel *model = static_cast<QStandardItemModel *>(table->model());
-    if (!model) return;
-
-    // 批量创建items
-    QList<QStandardItem *> items;
-    items.reserve(line.size()); // 预分配内存
-    for (const QString &text: line) {
-        QStandardItem *t = new QStandardItem(text);
-        t->setFlags(t->flags() & ~Qt::ItemIsEditable);
-        items.append(t);
-    }
-
-    // 单次插入整行
-    model->appendRow(items);
-}
-
 void sftpWindow::appendLine(const QTableView *table, const sftpClient::fileInfo &i) {
     if (!table) return;
 
     QStandardItemModel *model = static_cast<QStandardItemModel *>(table->model());
     if (!model) return;
 
-    auto func = [&](QString str)-> QStandardItem * {
+    auto new_func = [&](const QString &str)-> QStandardItem * {
         QStandardItem *t = new QStandardItem(str);
         t->setFlags(t->flags() & ~Qt::ItemIsEditable);
         return t;
     };
 
+    auto icon_func = [&](QStandardItem *item)-> QStandardItem * {
+        const QChar type = i.permissions.at(0);
+        QIcon icon;
+        if (type.isNull())
+            return item;
+        else if ('l' == type)
+            icon = QIcon{":/res/link.png"};
+        else if ('d' == type)
+            icon = QIcon{":/res/dir.png"};
+        else
+            icon = QIcon{":/res/file.png"};
+        item->setIcon(icon);
+        return item;
+    };
+
+    auto size_func = [&](QStandardItem *item) -> QStandardItem * {
+        const QChar type = i.permissions.at(0);
+        if (type.isNull() or
+            'l' == type or
+            '-' == type)
+            return item;
+        else if ('d' == type)
+            item->setText("");
+        return item;
+    };
+
     // 单次插入整行
     model->appendRow(QList{
-        func(i.filename),
-        func(i.permissions),
-        func(i.user),
-        func(i.userGroups),
-        func(i.fileSize),
-        func(i.dateModified),
+        icon_func(new_func(i.filename)),
+        new_func(i.permissions),
+        new_func(i.user),
+        new_func(i.userGroups),
+        size_func(new_func(i.fileSize)),
+        new_func(i.dateModified),
     });
 }
 
@@ -323,6 +346,44 @@ void sftpWindow::clearWith(QTableView *table) {
         // 恢复信号并触发单次更新
         model->blockSignals(false);
         model->headerDataChanged(Qt::Vertical, 0, model->rowCount() - 1);
+    }
+}
+
+void sftpWindow::doOpen() {
+    auto model = static_cast<QStandardItemModel *>(ui->tableWidget_list->model());
+    int row = ui->tableWidget_list->currentIndex().row();
+    QString remoteName = model->item(row, 0)->text();
+    QString thisPath = ui->lineEdit_url->text();
+
+    QChar fileType = model->item(row, 1)->text().at(0);
+    if ('d' == fileType) {
+        // 检查上级目录是否存在
+        std::shared_ptr<funcArgs1> args1 = std::make_shared<funcArgs1>();
+        args1->a1 = thisPath + "/" + remoteName;
+        ui->lineEdit_url->setText(args1->a1);
+        auto exist_rs = sftpThread_.try_do(funcType::exist, args1);
+        // 接收exist() 的结果
+        connect(exist_rs.get(), &sftpClientResponse::existResponse, this, [this](sftpClient::fileType file_t) {
+            if (sftpClient::fileType::dir != file_t) {
+                ui->lineEdit_url->setText(oldPath_);
+                return;
+            }
+
+            oldPath_ = ui->lineEdit_url->text();
+            // 尝试获取 目录列表
+            auto args2 = std::make_shared<funcArgs2>();
+            args2->a1 = oldPath_;
+            args2->a2 = "l";
+            auto ls_rs = sftpThread_.try_do(funcType::ls, args2);
+            connect(ls_rs.get(), &sftpClientResponse::lsResponse, this, [this](QList<sftpClient::fileInfo> list) {
+                clearWith(ui->tableWidget_list);
+                for (auto i: list) {
+                    appendLine(ui->tableWidget_list, i);
+                }
+            }, static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::SingleShotConnection));
+        }, static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::SingleShotConnection));
+    } else if ('-' == fileType) {
+    } else if ('l' == fileType) {
     }
 }
 
@@ -453,11 +514,82 @@ void sftpWindow::doPut() {
                 auto ls_rs = sftpThread_.try_do(funcType::ls, args2);
                 connect(ls_rs.get(), &sftpClientResponse::lsResponse, this, [this](QList<sftpClient::fileInfo> list) {
                     clearWith(ui->tableWidget_list);
-                    for (const auto& i: list) {
+                    for (const auto &i: list) {
                         appendLine(ui->tableWidget_list, i);
                     }
                 }, static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::SingleShotConnection));
             }, static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::SingleShotConnection));
         }, static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::SingleShotConnection));
     }, static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::SingleShotConnection));
+}
+
+void sftpWindow::doCopy() {
+    auto model = static_cast<QStandardItemModel *>(ui->tableWidget_list->model());
+    int row = ui->tableWidget_list->currentIndex().row();
+    QString srcName = model->item(row, 0)->text();
+    QString this_path = ui->lineEdit_url->text();
+    static QString srcPath = this_path + "/" + srcName;
+    static QString dstPath = this_path + "/" + srcName;
+
+    // 查看 src remote 文件是否存在
+    auto args1 = std::make_shared<funcArgs1>();
+    args1->a1 = srcPath;
+    auto exist_rs = sftpThread_.try_do(funcType::exist, args1);
+    connect(exist_rs.get(), &sftpClientResponse::existResponse, this, [this](sftpClient::fileType file_t) {
+        // 不是文件
+        if (sftpClient::fileType::file != file_t) {
+            ElaMessageBar::warning(ElaMessageBarType::TopLeft, tr("warning"), tr("remote file not exist"), 3000,
+                                   this);
+            return;
+        }
+
+        sftpGetThread_.start();
+        // 连接
+        auto args6 = std::make_shared<funcArgs6>();
+        args6->a1 = userInfo_.ip;
+        args6->a2 = userInfo_.port;
+        args6->a3 = userInfo_.user;
+        args6->a4 = userInfo_.password;
+        args6->a5 = userInfo_.pubkey_path;
+        args6->a6 = userInfo_.prikey_path;
+        auto connect_rs = sftpGetThread_.try_do(funcType::connectToHost, args6);
+        connect(connect_rs.get(), &sftpClientResponse::connectToHostResponse, this, [this](bool ok) {
+            auto model = static_cast<QStandardItemModel *>(ui->tableWidget_list->model());
+            int row = ui->tableWidget_list->currentIndex().row();
+            QString remoteName = model->item(row, 0)->text();
+            QString this_path = ui->lineEdit_url->text();
+
+            // 复制
+            std::shared_ptr<funcArgs2> args2 = std::make_shared<funcArgs2>();
+            args2->a1 = srcPath;
+            args2->a2 = dstPath;
+            auto get_rs = sftpGetThread_.try_do(funcType::get, args2);
+            connect(get_rs.get(), &sftpClientResponse::getTransferProgress, this,
+                    [this](qint64 bytesSent, qint64 bytesTotal) {
+                        ElaMessageBar::information(ElaMessageBarType::TopLeft,
+                                                   tr("info"),
+                                                   QString("%1 / %2")
+                                                   .arg(bytesSent, bytesTotal),
+                                                   3000, this);
+                    }, Qt::QueuedConnection);
+            // 下载结果
+            connect(get_rs.get(), &sftpClientResponse::getResponse, this, [this](bool ok) {
+                if (ok) {
+                    ElaMessageBar::information(ElaMessageBarType::TopLeft, tr("info"), tr("get OK"), 3000, this);
+                } else {
+                    ElaMessageBar::error(ElaMessageBarType::TopLeft, tr("error"), tr("get failed"), 3000, this);
+                }
+                sftpGetThread_.stop();
+            }, static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::SingleShotConnection));
+        }, static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::SingleShotConnection));
+    }, static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::SingleShotConnection));
+}
+
+void sftpWindow::doMove() {
+}
+
+void sftpWindow::doRename() {
+}
+
+void sftpWindow::doDelete() {
 }

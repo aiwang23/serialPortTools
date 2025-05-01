@@ -68,6 +68,7 @@ public:
     QList<fileInfo> ls(const QString &path, const QList<listArg> &args = {});
 
     // 重命名目录或文件
+    // 移动文件或文件夹
     bool rename(const QString &oldName, const QString &newName);
 
     // 复制文件

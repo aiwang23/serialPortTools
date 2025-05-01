@@ -55,11 +55,12 @@
 
 - [Qt](https://github.com/qt) v6.4
 - [ElaWidgetTools](https://github.com/Liniyous/ElaWidgetTools) Latest
-- [itas109::CSerialPort](https://github.com/itas109/CSerialPort) v4.3.2
+- [itas109::CSerialPort](https://github.com/itas109/CSerialPort) Latest
 - [maddy](https://github.com/progsource/maddy) v1.3.0
 - [concurrentqueue](https://github.com/cameron314/concurrentqueue) v1.0.4
 - [ThreadPool](https://github.com/progschj/ThreadPool) Latest
 - [nlohmann::json](https://github.com/nlohmann/json) v3.11.3
+- [libssh2](https://github.com/libssh2/libssh2) Latest
 
 ## 拉取该项目,并加载子模块
 
@@ -69,8 +70,10 @@ git clone --recursive https://github.com/aiwang23/serialPortTools.git
 
 ## 编译
 
-> 请把[CMakeLists.txt](CMakeLists.txt)的下述变量 修改自己电脑的Qt安装路径
-> - CMAKE_PREFIX_PATH
+> 1. 请把[CMakeLists.txt](CMakeLists.txt)的 `CMAKE_PREFIX_PATH` 修改自己电脑的Qt安装路径
+>  2. 请自己电脑上安装 **openssl**, 并设置环境变量
+>     1. Windows, 可使用 [openssl](https://slproweb.com/products/Win32OpenSSL.html) 来快速安装
+>     2. Debian/Ubuntu 可使用 `sudo apt install libssl-dev` 来快速安装
 
 ### Windows10+
 

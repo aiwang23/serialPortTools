@@ -22,6 +22,7 @@ namespace Ui {
 
 QT_END_NAMESPACE
 
+// TODO: 后面完善完功能之后 再加到class mainWindow里面
 class sftpWindow : public QWidget {
     Q_OBJECT
 
@@ -39,21 +40,26 @@ private:
 
     void initMenu();
 
-    static void appendLine(const QTableView *table, const QStringList &line);
-
     static void appendLine(const QTableView *table, const sftpClient::fileInfo &i);
 
     static void removeLine(const QTableView *table, int index);
 
     static void clearWith(QTableView *table);
 
-Q_SIGNALS:
-    Q_SIGNAL void mouseLeftEntered(QPoint point);
-
 private Q_SLOTS:
+    Q_SLOT void doOpen();
+
     Q_SLOT void doGet();
 
     Q_SLOT void doPut();
+
+    Q_SLOT void doCopy();
+
+    Q_SLOT void doMove();
+
+    Q_SLOT void doRename();
+
+    Q_SLOT void doDelete();
 
 private:
     Ui::sftpWindow *ui;
@@ -69,6 +75,11 @@ private:
     ElaMenu *menu_ = nullptr;
     QAction *getAction_ = nullptr;
     QAction *putAction_ = nullptr;
+    QAction *openAction_ = nullptr;
+    QAction *copyAction_ = nullptr;
+    QAction *moveAction_ = nullptr;
+    QAction *renameAction_ = nullptr;
+    QAction *deleteAction_ = nullptr;
 };
 
 

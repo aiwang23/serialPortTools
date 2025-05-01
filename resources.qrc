@@ -3,5 +3,8 @@
         <file>res/translations/en_US.qm</file>
         <file>res/translations/zh_CN.qm</file>
         <file>res/plug.png</file>
+        <file>res/dir.png</file>
+        <file>res/file.png</file>
+        <file>res/link.png</file>
     </qresource>
 </RCC>
